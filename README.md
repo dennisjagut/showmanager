@@ -44,7 +44,7 @@ To start over with an empty database: `.venv/bin/python -m backend.reset --yes`.
 
 - Passwords are stored as scrypt hashes, never in plain text. A login creates a session with a random token: the browser keeps it in an HTTP-only cookie, the database only its SHA-256. Sessions end after 90 days, on logout, and when the password changes (changing your own password keeps the current session).
 - After 5 wrong passwords in a row, the account is locked for 15 minutes, and every further wrong password locks it again until a login succeeds or an admin unlocks it. Unknown usernames get the same answer as wrong passwords.
-- The backup (JSON) does not contain the accounts.
+- The backup JSON does not contain the accounts.
 
 ## Calculator as a single file
 
