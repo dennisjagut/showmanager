@@ -34,7 +34,7 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.1.2",
     "concurrently": "^10.0.6",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-config-next": "^16.4.2",
     "openapi-typescript": "^7.13.0",
     "prettier": "^3.9.10",
