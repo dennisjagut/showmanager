@@ -1,0 +1,532 @@
+{
+  "app": {
+    "name": "Showmanager",
+    "description": "Festivalbewerbungen und Shows der Band im Blick behalten"
+  },
+  "common": {
+    "backToOverview": "← Zur Übersicht",
+    "allShows": "← Alle Shows",
+    "backToShow": "← Zurück zur Show",
+    "save": "Speichern",
+    "add": "Hinzufügen",
+    "done": "Fertig",
+    "edit": "Bearbeiten",
+    "loading": "Wird geladen",
+    "name": "Name",
+    "map": "Karte ↗",
+    "remove": "{name} entfernen",
+    "delete": "{name} löschen",
+    "yes": "ja",
+    "no": "nein",
+    "saved": "Gespeichert ✓"
+  },
+  "errors": {
+    "title": "Da ist etwas schiefgegangen",
+    "text": "Die Seite konnte nicht geladen oder die Änderung nicht gespeichert werden. Versucht es noch einmal.",
+    "code": "Fehlernummer: {digest}",
+    "retry": "Nochmal versuchen",
+    "home": "Zur Startseite",
+    "notFoundTitle": "Seite nicht gefunden",
+    "notFoundText": "Diese Seite gibt es nicht oder nicht mehr, z. B. weil der Eintrag gelöscht wurde."
+  },
+  "auth": {
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "repeatPassword": "Passwort wiederholen",
+    "passwordHint": "Mindestens 10 Zeichen. Ein Satz aus mehreren Wörtern ist sicher und gut zu merken.",
+    "setupTitle": "Ersten Zugang anlegen",
+    "setupIntro": "Noch gibt es keine Zugänge. Lege den ersten an: Er wird Admin und legt dann die Zugänge für die anderen an.",
+    "setupSubmit": "Zugang anlegen",
+    "account": "Mein Zugang",
+    "errors": {
+      "wrong": "Benutzername oder Passwort falsch.",
+      "wrongPassword": "Das aktuelle Passwort ist falsch.",
+      "locked": "Zu viele falsche Versuche. Der Zugang ist für {minutes} Minuten gesperrt. Ein Admin kann ihn vorher entsperren.",
+      "mismatch": "Die Passwörter stimmen nicht überein.",
+      "invalid": "Bitte die Eingaben prüfen: Benutzernamen mit 2–40 Zeichen (Buchstaben, Ziffern, . _ -), Passwörter mit mindestens 10 Zeichen.",
+      "taken": "Diesen Benutzernamen gibt es schon.",
+      "self": "Das geht nicht beim eigenen Zugang."
+    }
+  },
+  "nav": {
+    "modules": "Module",
+    "menu": "Menü",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "customize": "Module anpassen",
+    "customizeHint": "Welche Module willst du sehen? Das gilt nur in diesem Browser.",
+    "allHidden": "Alle Module ausgeblendet.",
+    "expand": "Seitenleiste aufklappen",
+    "collapse": "Einklappen"
+  },
+  "modules": {
+    "applications": "Bewerbungen",
+    "shows": "Shows",
+    "calculator": "Kalkulator",
+    "data": "Export"
+  },
+  "applicationStatus": {
+    "open": "Offen",
+    "applied": "Beworben",
+    "no_response": "Keine Antwort",
+    "rejected": "Absage",
+    "accepted": "Zusage",
+    "skipped": "Nicht berücksichtigt"
+  },
+  "applicationStatusHint": {
+    "open": "Noch nicht beworben",
+    "applied": "Bewerbung ist raus",
+    "no_response": "Bewerbung ohne Rückmeldung",
+    "rejected": "Festival hat abgesagt",
+    "accepted": "Wir spielen!",
+    "skipped": "Für dieses Jahr bewusst ausgelassen"
+  },
+  "applications": {
+    "title": "Bewerbungen Saison {season}",
+    "summary": "{festivals} Festivals · {sent} Bewerbungen verschickt",
+    "soonOpen": "{count} offene mit Deadline in den nächsten {days} Tagen",
+    "exportCsv": "CSV exportieren",
+    "newFestival": "+ Festival",
+    "results": "{count} Treffer",
+    "columns": {
+      "festival": "Festival",
+      "month": "Monat",
+      "deadline": "Deadline",
+      "contact": "Kontakt",
+      "status": "Status {season}",
+      "appliedNote": "Beworben / Notiz"
+    },
+    "inactive": "inaktiv",
+    "appliedOnShort": "am {date}",
+    "appliedOnSentence": "Beworben am {date}.",
+    "deadlineLabel": "Deadline:",
+    "empty": "Keine Festivals für diese Filter.",
+    "statusSelect": "Status {festival} {season}"
+  },
+  "filters": {
+    "search": "Suche",
+    "searchPlaceholder": "Festival, Ort, Kontakt, Notiz …",
+    "season": "Saison",
+    "status": "Status",
+    "state": "Bundesland",
+    "festivalMonth": "Festivalmonat",
+    "deadline": "Deadline",
+    "sort": "Sortierung",
+    "all": "Alle",
+    "deadlineSoon": "In den nächsten {days} Tagen",
+    "deadlinePassed": "Schon vorbei",
+    "deadlineKnown": "Mit Deadline",
+    "sortName": "Name",
+    "sortDeadline": "Deadline",
+    "sortMonth": "Festivalmonat",
+    "sortStatus": "Status",
+    "sortApplied": "Zuletzt beworben",
+    "showInactive": "Inaktive Festivals zeigen (existieren nicht mehr)",
+    "reset": "Filter zurücksetzen"
+  },
+  "deadline": {
+    "approximate": "Aus dem Freitext abgeleitetes, ungefähres Datum",
+    "passed": "vorbei",
+    "soon": "bald"
+  },
+  "festival": {
+    "newTitle": "Neues Festival",
+    "inactive": "inaktiv",
+    "applications": "Bewerbungen",
+    "noApplications": "Noch keine Bewerbung erfasst – Status ist überall „{status}“.",
+    "addSeason": "Bewerbung für Saison anlegen",
+    "create": "Anlegen",
+    "masterData": "Stammdaten",
+    "deleteConfirm": "„{name}“ inklusive aller Bewerbungen löschen? Tipp: Für Festivals, die es nicht mehr gibt, reicht „inaktiv“.",
+    "delete": "Festival endgültig löschen",
+    "season": "Saison {season}",
+    "deadlineLabel": "Deadline:",
+    "status": "Status",
+    "statusOption": "{label} – {hint}",
+    "appliedOn": "Beworben am",
+    "note": "Notiz",
+    "notePlaceholder": "z. B. per Mail an … geschickt, nachhaken im Januar",
+    "remove": "Bewerbung entfernen",
+    "removeConfirm": "Bewerbung für Saison {season} entfernen?"
+  },
+  "festivalForm": {
+    "name": "Name *",
+    "location": "Ort (PLZ + Ort)",
+    "locationPlaceholder": "12345 Musterstadt",
+    "state": "Bundesland",
+    "month": "Festivalmonat",
+    "deadline": "Deadline Bewerbung",
+    "deadlinePlaceholder": "z. B. vor Oktober",
+    "website": "Website",
+    "contact": "Kontakt",
+    "contactPlaceholder": "E-Mail, Formular-Link, Ansprechpartner …",
+    "notes": "Hinweise",
+    "active": "Festival existiert noch (aktiv)",
+    "saveChanges": "Änderungen speichern",
+    "create": "Festival anlegen"
+  },
+  "data": {
+    "title": "Export",
+    "intro": "Die Daten liegen nur in unserer Datenbank. Ladet ab und zu ein Backup herunter und legt es an einem sicheren Ort ab.",
+    "export": "Exportieren",
+    "exportApplications": "📨 Bewerbungen einer Saison (CSV)",
+    "season": "Saison {season}",
+    "download": "Herunterladen",
+    "exportShows": "🎤 Shows mit Tagesablauf und Gästeliste (CSV)",
+    "exportCalculator": "🧮 Kalkulator: Posten und aktuelle Anfrage (CSV)",
+    "backup": "<strong>Komplettes Backup</strong> aller Module und Saisons (JSON)",
+    "downloadBackup": "Backup herunterladen"
+  },
+  "csv": {
+    "applications": {
+      "filename": "bewerbungen-{season}.csv",
+      "name": "Name",
+      "location": "Ort",
+      "state": "Bundesland",
+      "month": "Monat",
+      "website": "Website",
+      "deadline": "Deadline Bewerbung",
+      "contact": "Kontakt",
+      "notes": "Hinweise",
+      "active": "Aktiv",
+      "status": "Status {season}",
+      "appliedOn": "Beworben am",
+      "note": "Notiz"
+    },
+    "shows": {
+      "filename": "shows.csv",
+      "addedBy": "von {name}",
+      "columns": {
+        "date": "Datum",
+        "title": "Titel",
+        "tour": "Tour",
+        "status": "Status",
+        "venue": "Venue",
+        "address": "Adresse",
+        "contact": "Kontakt",
+        "phone": "Telefon",
+        "email": "E-Mail",
+        "fee": "Gage / Deal",
+        "guestQuota": "Gästeliste-Kontingent",
+        "guests": "Gäste (Personen)",
+        "hotel": "Hotel",
+        "travel": "Anreise",
+        "tech": "Technik / Backline",
+        "notes": "Hinweise",
+        "schedule": "Tagesablauf",
+        "guestList": "Gästeliste"
+      }
+    },
+    "calculator": {
+      "filename": "kalkulator.csv",
+      "categories": {
+        "vehicle": "Fahrzeug",
+        "accommodation": "Übernachtung",
+        "crew": "Crew",
+        "other": "Sonstiges"
+      },
+      "billing": {
+        "per_day": "pro Tag",
+        "flat": "pauschal"
+      },
+      "columns": {
+        "category": "Kategorie",
+        "name": "Name",
+        "billing": "Abrechnung",
+        "amount": "Betrag €",
+        "fuel": "Sprit €/km",
+        "freeKm": "Freikilometer",
+        "selected": "In der Anfrage",
+        "quantity": "Anzahl",
+        "duration": "Miettage / Nächte",
+        "cost": "Kosten in der Anfrage €"
+      },
+      "inquiry": "Anfrage",
+      "oneWayKm": "{km} km einfach",
+      "daysOnSite": "{count, plural, one {# Tag} other {# Tage}} vor Ort",
+      "buffer": "{percent} % Puffer",
+      "total": "Fixkosten gesamt €"
+    }
+  },
+  "showStatus": {
+    "option": "Option",
+    "confirmed": "Bestätigt",
+    "cancelled": "Abgesagt"
+  },
+  "showInfo": {
+    "contact": "Veranstalter / Kontakt",
+    "fee": "Gage / Deal",
+    "travel": "Anreise",
+    "hotel": "Hotel / Übernachtung",
+    "tech": "Technik & Backline",
+    "notes": "Sonstige Hinweise"
+  },
+  "shows": {
+    "title": "Shows",
+    "summary": "{confirmed} bestätigte und {options} optionale Shows stehen an",
+    "templates": "Ablauf-Vorlagen",
+    "newShow": "+ Show",
+    "showtime": "Showtime {time}",
+    "toShow": "Zur Show →",
+    "views": {
+      "upcoming": "Kommende",
+      "past": "Vergangene",
+      "all": "Alle"
+    },
+    "allTours": "Alle Touren",
+    "venueOpen": "Venue noch offen",
+    "time": "{time} Uhr",
+    "guests": "Gäste {count}",
+    "guestsOfQuota": "Gäste {count} / {quota}",
+    "emptyUpcoming": "Keine anstehenden Shows.",
+    "empty": "Keine Shows gefunden.",
+    "create": "Show anlegen",
+    "countdown": {
+      "today": "Heute",
+      "tomorrow": "Morgen",
+      "next": "Nächste",
+      "in": "in",
+      "show": "Show",
+      "days": "Tagen"
+    }
+  },
+  "show": {
+    "newTitle": "Neue Show",
+    "editTitle": "{title} bearbeiten",
+    "relative": {
+      "today": "heute",
+      "tomorrow": "morgen",
+      "yesterday": "gestern",
+      "future": "in {days} Tagen",
+      "past": "vor {days} Tagen"
+    },
+    "daysheet": "Daysheet",
+    "schedule": "Tagesablauf",
+    "daysheetSchedule": "Ablauf",
+    "noSchedule": "Noch kein Ablauf eingetragen.",
+    "guestList": "Gästeliste",
+    "people": "{count, plural, one {# Person} other {# Personen}}",
+    "peopleOfQuota": "{count, plural, one {# Person} other {# Personen}} von {quota} Plätzen",
+    "guestListCount": "Gästeliste ({count, plural, one {# Person} other {# Personen}})",
+    "via": "über {name}",
+    "plusOnes": "Begleitung",
+    "addedBy": "Eingetragen von",
+    "addedByPlaceholder": "z. B. Dennis",
+    "infos": "Infos",
+    "noInfos": "Noch keine Infos.",
+    "addInfos": "Jetzt ergänzen",
+    "deleteConfirm": "Show „{title}“ inklusive Ablauf und Gästeliste löschen?",
+    "delete": "Show löschen",
+    "print": "Drucken",
+    "downloadPdf": "PDF herunterladen",
+    "page": "Seite {page}/{total}",
+    "time": "Zeit",
+    "item": "Programmpunkt",
+    "itemPlaceholder": "Vorlage wählen oder frei eingeben",
+    "repeatableHint": "Wird bei mehrfacher Verwendung durchnummeriert",
+    "manageTemplates": "Vorlagen verwalten"
+  },
+  "showForm": {
+    "show": "Show",
+    "date": "Datum *",
+    "title": "Titel *",
+    "titlePlaceholder": "z. B. Rock am Töschen",
+    "status": "Status",
+    "tour": "Tour / Reihe",
+    "tourPlaceholder": "optional, z. B. Sommer 2027",
+    "venue": "Venue",
+    "venuePlaceholder": "Club, Festivalgelände, Bühne …",
+    "address": "Adresse",
+    "addressPlaceholder": "Straße, PLZ Ort",
+    "promoter": "Veranstalter & Deal",
+    "contactName": "Ansprechpartner",
+    "contactPhone": "Telefon",
+    "contactEmail": "E-Mail",
+    "feePlaceholder": "z. B. 400 € + Catering + Fahrtkosten",
+    "guestQuota": "Gästelistenplätze",
+    "logistics": "Logistik",
+    "travelPlaceholder": "Abfahrt, Treffpunkt, Fahrer, Parken …",
+    "hotelPlaceholder": "Name, Adresse, Check-in, Zimmer …",
+    "techPlaceholder": "Backline vor Ort, Bühnengröße, Stageplot, Ton …",
+    "notesPlaceholder": "Catering, Merch, WLAN, Garderobe …",
+    "saveChanges": "Änderungen speichern",
+    "create": "Show anlegen"
+  },
+  "templates": {
+    "title": "Vorlagen für den Tagesablauf",
+    "intro": "Diese Programmpunkte stehen bei jeder Show zur Auswahl, in dieser Reihenfolge. Punkte mit „mehrfach“ werden automatisch durchnummeriert, sobald sie in einer Show öfter vorkommen, z. B. Support 1, Support 2.",
+    "moveUp": "{name} nach oben",
+    "moveDown": "{name} nach unten",
+    "repeatable": "mehrfach",
+    "deleteConfirm": "Vorlage „{name}“ löschen? Bereits eingetragene Abläufe bleiben erhalten.",
+    "empty": "Noch keine Vorlagen.",
+    "new": "Neue Vorlage",
+    "newPlaceholder": "z. B. Meet & Greet"
+  },
+  "calculator": {
+    "title": "Gig-Kalkulator",
+    "intro": "Fixkosten pro Anfrage, grob und schnell für die Gagenverhandlung. Alles wird automatisch für die ganze Band gespeichert.",
+    "gig": "Auftritt & Anfahrt",
+    "location": "Veranstaltungsort",
+    "locationPlaceholder": "Venue, PLZ Ort",
+    "oneWayKm": "Entfernung einfach (km)",
+    "days": "Tage vor Ort",
+    "buffer": "Puffer (%)",
+    "roundTrip": "Hin- & Rückfahrt",
+    "totalKm": "Gesamt: <strong>{km} km</strong>",
+    "checkRoute": "Strecke in Google Maps prüfen ↗",
+    "blocks": {
+      "vehicle": {
+        "title": "Fahrzeuge",
+        "add": "+ Fahrzeug"
+      },
+      "accommodation": {
+        "title": "Übernachtung",
+        "add": "+ Zimmer",
+        "empty": "Noch keine Zimmer. Legt eure Zimmertypen mit Preis pro Nacht an, z. B. Doppelzimmer."
+      },
+      "crew": {
+        "title": "Crew (Tagessatz × Tage)",
+        "add": "+ Crew-Mitglied"
+      },
+      "other": {
+        "title": "Foto, Social Media & Sonstiges",
+        "add": "+ Position"
+      }
+    },
+    "empty": "Noch nichts angelegt.",
+    "nothingSelected": "Nichts ausgewählt",
+    "summary": {
+      "title": "Übersicht",
+      "rent": "Fahrzeuge (Miete)",
+      "fuel": "Sprit",
+      "accommodation": "Übernachtung",
+      "crew": "Crew ({count, plural, one {# Tag} other {# Tage}})",
+      "other": "Foto / Social / Sonstiges",
+      "subtotal": "Zwischensumme",
+      "buffer": "Puffer ({percent} %)",
+      "total": "Fixkosten gesamt"
+    },
+    "reset": "Anfrage zurücksetzen",
+    "wasReset": "Zurückgesetzt ✓",
+    "resetConfirm": "Anfrage zurücksetzen? Ort, Strecke und Auswahl werden für alle geleert.",
+    "deleteConfirm": "„{name}“ löschen? Der Posten ist dann für alle weg.",
+    "bar": {
+      "title": "Fixkosten (inkl. Puffer)",
+      "minimum": "Mindestforderung"
+    },
+    "saveStatus": {
+      "saved": "Gespeichert",
+      "saving": "Speichert …",
+      "error": "Nicht gespeichert – Verbindung prüfen"
+    },
+    "dayRate": "Tagessatz × {count, plural, one {# Tag} other {# Tage}}",
+    "flatRate": "Pauschale",
+    "include": "{name} mitrechnen",
+    "notIncluded": "Wird erst mitgerechnet, wenn angehakt",
+    "name": "Name",
+    "delete": "{name} löschen",
+    "decrease": "{label} verringern",
+    "increase": "{label} erhöhen",
+    "newItem": {
+      "vehicle": "Neues Fahrzeug",
+      "accommodation": "Neues Zimmer",
+      "crew": "Neues Crew-Mitglied",
+      "other": "Neue Position"
+    },
+    "vehicle": {
+      "noRent": "ohne Miete",
+      "rentPerDay": "{amount} pro Tag",
+      "rentFlat": "{amount} pauschal",
+      "freeKm": "{km}\u00a0km frei",
+      "noFuel": "ohne Sprit",
+      "fuel": "Sprit {price}\u00a0€/km",
+      "rentTimesDays": "{amount} × {count, plural, one {#\u00a0Tag} other {#\u00a0Tage}}",
+      "fuelCost": "{km}\u00a0km × {price}\u00a0€",
+      "fuelCostAboveFree": "({km} − {free}\u00a0frei)\u00a0km × {price}\u00a0€",
+      "noFuelCost": "kein Sprit ({km} von {free} Frei-km)",
+      "cheaper": "Günstiger: {name} für {cost} ({saving} weniger)",
+      "cheaperPerVehicle": "Günstiger: {name} für {cost} pro Fahrzeug ({saving} weniger)",
+      "quantity": "Anzahl",
+      "rentalDays": "Miettage",
+      "days": "{count, plural, one {#\u00a0Tag} other {#\u00a0Tage}}",
+      "delete": "Fahrzeug löschen",
+      "rent": "Miete",
+      "rentLabel": "Miete in Euro",
+      "billing": {
+        "per_day": "pro Tag",
+        "flat": "pauschal"
+      },
+      "rentHelp": "0 € für eigene Fahrzeuge ohne Miete.",
+      "freeKmLabel": "Freikilometer",
+      "freeKmIncluded": "in der Miete enthalten",
+      "freeKmHelp": "Sprit wird erst für die Kilometer darüber berechnet.",
+      "fuelLabel": "Sprit",
+      "fuelAria": "Sprit in Euro pro Kilometer",
+      "perKm": "pro km"
+    },
+    "room": {
+      "rate": "{amount} pro Nacht",
+      "calculation": "{rooms}\u00a0Zimmer × {amount} × {nights, plural, one {#\u00a0Nacht} other {#\u00a0Nächte}}",
+      "rooms": "Zimmer",
+      "nightsLabel": "Nächte",
+      "nights": "{count, plural, one {#\u00a0Nacht} other {#\u00a0Nächte}}",
+      "delete": "Zimmer löschen",
+      "namePlaceholder": "z. B. Doppelzimmer",
+      "price": "Preis pro Zimmer und Nacht"
+    }
+  },
+  "account": {
+    "title": "Zugang",
+    "intro": "Angemeldet als {username}.",
+    "changePassword": "Passwort ändern",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "changePasswordHint": "Andere Geräte werden danach abgemeldet.",
+    "users": "Zugänge",
+    "usersIntro": "Jedes Bandmitglied hat einen eigenen Zugang. Nach {max} falschen Passwörtern in Folge wird ein Zugang für {minutes} Minuten gesperrt.",
+    "admin": "Admin",
+    "you": "du",
+    "locked": "gesperrt, noch {minutes} Min.",
+    "failedLogins": "{count, plural, one {# Fehlversuch} other {# Fehlversuche}}",
+    "unlock": "Entsperren",
+    "makeAdmin": "Zum Admin machen",
+    "removeAdmin": "Admin entfernen",
+    "resetPassword": "Neues Passwort setzen",
+    "resetPasswordHint": "Für {username}: hebt eine Sperre auf und meldet den Zugang überall ab.",
+    "deleteConfirm": "Zugang „{username}“ wirklich löschen?",
+    "newUser": "Neuer Zugang",
+    "newUserAdmin": "Admin (darf Zugänge verwalten)",
+    "create": "Anlegen",
+    "ok": {
+      "password": "Passwort geändert ✓",
+      "created": "Zugang angelegt ✓",
+      "reset": "Neues Passwort gesetzt ✓",
+      "unlocked": "Zugang entsperrt ✓",
+      "saved": "Gespeichert ✓",
+      "deleted": "Zugang gelöscht ✓"
+    }
+  },
+  "standalone": {
+    "calculator": {
+      "intro": "Fixkosten pro Anfrage, grob und schnell für die Gagenverhandlung. Alles wird automatisch in diesem Browser gespeichert.",
+      "resetConfirm": "Anfrage zurücksetzen? Ort, Strecke und Auswahl werden geleert.",
+      "deleteConfirm": "„{name}“ löschen?",
+      "saveStatus": {
+        "error": "Nicht gespeichert – der Browser lässt keinen Speicher zu"
+      }
+    },
+    "data": {
+      "title": "Daten",
+      "intro": "Die Daten liegen nur in diesem Browser auf diesem Gerät. Ladet ab und zu ein Backup herunter, damit könnt ihr sie auch auf ein anderes Gerät oder in eine neue Version der Datei mitnehmen.",
+      "export": "Backup herunterladen",
+      "import": "Backup laden",
+      "importConfirm": "Alle Posten und die Anfrage durch das Backup ersetzen?",
+      "importError": "Die Datei ist kein Backup des Kalkulators.",
+      "imported": "Backup geladen ✓",
+      "saveError": "Das Backup konnte nicht gespeichert werden, der Browser lässt keinen Speicher zu."
+    }
+  }
+}

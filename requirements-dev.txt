@@ -1,0 +1,3 @@
+# Local development: the API dependencies plus the server for `npm run dev`
+-r requirements.txt
+uvicorn==0.54.0

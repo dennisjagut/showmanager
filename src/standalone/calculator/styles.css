@@ -1,0 +1,11 @@
+@import "../../app/globals.css";
+
+/* Tailwind only finds the classes of the files it scans; these are the ones the standalone file uses */
+@source "../../features/calculator";
+@source "../../components/ui";
+@source "./";
+
+/* No sidebar here: the calculator's bar at the bottom starts at the left edge */
+body {
+  --sidebar: 0px !important;
+}

@@ -1,0 +1,51 @@
+{
+  "name": "showmanager",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "concurrently -n web,api -c magenta,cyan \"next dev\" \"npm run api:dev\"",
+    "api:dev": ".venv/bin/python -m uvicorn api.index:app --reload --port 8000",
+    "api:types": ".venv/bin/python -m backend.openapi .next/openapi.json && openapi-typescript .next/openapi.json -o src/lib/api/schema.ts",
+    "build": "next build",
+    "calculator:dev": "vite --config vite.calculator.config.mts",
+    "calculator:build": "vite build --config vite.calculator.config.mts",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "clsx": "^2.1.1",
+    "next": "^16.4.2",
+    "next-intl": "^4.14.9",
+    "pdf-lib": "^1.17.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwind-merge": "^3.7.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
+    "eslint": "^9",
+    "eslint-config-next": "^16.4.2",
+    "openapi-typescript": "^7.13.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "use-intl": "^4.14.9",
+    "vite": "^8.3.5",
+    "vite-plugin-singlefile": "^2.3.4"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

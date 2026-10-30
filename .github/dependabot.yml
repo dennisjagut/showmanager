@@ -1,0 +1,57 @@
+# Dependabot keeps the PR volume low:
+# - monthly runs, so routine updates arrive in one batch
+# - minor and patch updates are grouped into one PR per ecosystem
+# - security fixes are grouped too, and are not delayed by the cooldown
+# - releases have to be out for a while before Dependabot proposes them
+# Major updates still get one PR each, since every one needs its own migration.
+# CI merges minor and patch PRs automatically once it passes (see workflows/ci.yml).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+      timezone: Europe/Berlin
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
+    ignore:
+      # Tracks the minimum Node version in package.json "engines", not the latest Node release
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: monthly
+      timezone: Europe/Berlin
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+    open-pull-requests-limit: 3
+    groups:
+      pip-minor-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+      pip-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      timezone: Europe/Berlin
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]

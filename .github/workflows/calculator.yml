@@ -1,0 +1,52 @@
+name: Calculator
+
+# Publishes the standalone calculator (one HTML file, see vite.calculator.config.mts) for a tag like calculator-v1.0.0:
+# attaches it to a GitHub release and puts it on GitHub Pages. The app on Vercel is not affected.
+
+on:
+  push:
+    tags: ["calculator-v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: calculator
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run calculator:build
+      # Always the same file name: the browser keeps the data of a downloaded file under its path, so whoever replaces
+      # the old file with the new one keeps their data
+      - run: gh release create "$TAG" dist/kalkulator.html --verify-tag --title "Kalkulator ${TAG#calculator-}" --generate-notes
+        env:
+          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: mkdir pages && cp dist/kalkulator.html pages/index.html
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: pages
+
+  pages:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
