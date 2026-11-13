@@ -11,18 +11,23 @@ export function Deadline({
   text,
   info,
   highlight,
+  inline = false,
 }: {
   text: string | null;
   info: DeadlineInfo | null;
   // only color-code applications that are still open
   highlight: boolean;
+  // Text and date side by side (in a line of text) instead of one above the other (in a table cell)
+  inline?: boolean;
 }) {
   const t = useTranslations("deadline");
   const locale = useLocale();
   if (!text) return <span className="text-zinc-400">–</span>;
   if (!info) return <span>{text}</span>;
   return (
-    <span className="inline-flex flex-col gap-0.5">
+    <span
+      className={inline ? "inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5" : "inline-flex flex-col gap-0.5"}
+    >
       <span>{text}</span>
       <span title={t("approximate")}>
         <Badge tone={highlight ? TONE[info.state] : "neutral"}>

@@ -2,6 +2,7 @@
 
 from ..core import db
 from .models import Application, ApplicationStatus, Festival
+from .schemas import ApplicationIn
 
 FESTIVAL_FIELDS = ["name", "location", "state", "month", "website", "deadline", "contact", "notes", "active"]
 
@@ -61,15 +62,6 @@ def insert(values: dict[str, object]) -> int:
         )
 
 
-def update(festival_id: int, values: dict[str, object]) -> None:
-    with db.write() as w:
-        w.execute(
-            f"update festivals set {', '.join(f'{k} = ?' for k in FESTIVAL_FIELDS)}, updated_at = datetime('now') "
-            "where id = ?",
-            [*(values[k] for k in FESTIVAL_FIELDS), festival_id],
-        )
-
-
 def delete(festival_id: int) -> None:
     """Deletes the festival with all its applications"""
     with db.write() as w:
@@ -77,18 +69,28 @@ def delete(festival_id: int) -> None:
         w.execute("delete from festivals where id = ?", (festival_id,))
 
 
-def save_application(
-    festival_id: int, season: int, status: ApplicationStatus, applied_on: str | None, note: str | None
-) -> None:
-    """Creates the application of the season or overwrites it"""
+def save_with_applications(festival_id: int, values: dict[str, object], applications: list[ApplicationIn]) -> None:
+    """
+    Saves the festival and all its applications in one transaction: seasons in the list are created or overwritten,
+    the other seasons of the festival are deleted
+    """
+    seasons = [a.season for a in applications]
     with db.write() as w:
         w.execute(
-            """insert into applications (festival_id, season, status, applied_on, note) values (?, ?, ?, ?, ?)
-               on conflict (festival_id, season) do update set
-                 status = excluded.status, applied_on = excluded.applied_on, note = excluded.note,
-                 updated_at = datetime('now')""",
-            (festival_id, season, status, applied_on, note),
+            f"update festivals set {', '.join(f'{k} = ?' for k in FESTIVAL_FIELDS)}, updated_at = datetime('now') "
+            "where id = ?",
+            [*(values[k] for k in FESTIVAL_FIELDS), festival_id],
         )
+        not_kept = f"and season not in ({', '.join('?' * len(seasons))})" if seasons else ""
+        w.execute(f"delete from applications where festival_id = ? {not_kept}", (festival_id, *seasons))
+        for a in applications:
+            w.execute(
+                """insert into applications (festival_id, season, status, applied_on, note) values (?, ?, ?, ?, ?)
+                   on conflict (festival_id, season) do update set
+                     status = excluded.status, applied_on = excluded.applied_on, note = excluded.note,
+                     updated_at = datetime('now')""",
+                (festival_id, a.season, a.status, a.applied_on, a.note),
+            )
 
 
 def save_status(festival_id: int, season: int, status: ApplicationStatus, applied_on: str | None) -> None:
@@ -101,8 +103,3 @@ def save_status(festival_id: int, season: int, status: ApplicationStatus, applie
                  updated_at = datetime('now')""",
             (festival_id, season, status, applied_on),
         )
-
-
-def delete_application(festival_id: int, season: int) -> None:
-    with db.write() as w:
-        w.execute("delete from applications where festival_id = ? and season = ?", (festival_id, season))

@@ -5,12 +5,12 @@ from . import repository
 from .deadline import DEADLINE_SOON_DAYS, deadline_for_season, month_index
 from .models import STATUSES, Application, Festival
 from .schemas import (
-    ApplicationIn,
     ApplicationWithDeadline,
     FestivalDetails,
     FestivalIn,
     FestivalList,
     FestivalRow,
+    FestivalSaveIn,
     Overview,
     OverviewFilters,
     OverviewRow,
@@ -130,24 +130,25 @@ def create_festival(body: FestivalIn) -> int:
     return repository.insert(_festival_values(body))
 
 
-def update_festival(festival_id: int, body: FestivalIn) -> None:
-    repository.update(festival_id, _festival_values(body))
+def save_festival(festival_id: int, body: FestivalSaveIn) -> FestivalDetails | None:
+    """
+    Saves the festival with all its applications and returns it as saved; seasons that are missing are deleted.
+    "applied" without a date gets today. None if the festival does not exist.
+    """
+    if not repository.find_by_id(festival_id):
+        return None
+    applications = [
+        a.model_copy(update={"applied_on": today_iso()}) if a.status == "applied" and not a.applied_on else a
+        for a in body.applications
+    ]
+    repository.save_with_applications(festival_id, _festival_values(body), applications)
+    return festival_details(festival_id)
 
 
 def delete_festival(festival_id: int) -> None:
     repository.delete(festival_id)
 
 
-def save_application(festival_id: int, season: int, body: ApplicationIn) -> None:
-    """Creates or updates the application of one season. "applied" without a date gets today."""
-    applied_on = body.applied_on or (today_iso() if body.status == "applied" else None)
-    repository.save_application(festival_id, season, body.status, applied_on, body.note)
-
-
 def set_status(festival_id: int, season: int, body: StatusIn) -> None:
     """Quick status change from the overview. "applied" sets today as the date, an existing date is kept."""
     repository.save_status(festival_id, season, body.status, today_iso() if body.status == "applied" else None)
-
-
-def delete_application(festival_id: int, season: int) -> None:
-    repository.delete_application(festival_id, season)

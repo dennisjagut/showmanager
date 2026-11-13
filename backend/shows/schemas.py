@@ -1,6 +1,6 @@
 """What the API receives and returns. The entities themselves are in models.py."""
 
-from typing import Literal
+from pydantic import model_validator
 
 from ..core.base import ApiModel, IsoDate, OptionalCount, OptionalId, OptionalText, RequiredText, Time
 from ..masterdata.models import PackingList, PackingListCategory, PackingListItem
@@ -91,9 +91,21 @@ class PackingMarkIn(ApiModel):
 
 
 class TemplateIn(ApiModel):
+    # None for a new template
+    id: int | None = None
     name: RequiredText
     repeatable: bool = False
 
 
-class MoveIn(ApiModel):
-    direction: Literal["up", "down"]
+class TemplatesSaveIn(ApiModel):
+    """All templates as they should be afterwards, in this order: what is missing is deleted, what has no ID is added"""
+
+    templates: list[TemplateIn] = []
+
+    @model_validator(mode="after")
+    def unique_names(self) -> "TemplatesSaveIn":
+        names = [t.name for t in self.templates]
+        duplicates = sorted({n for n in names if names.count(n) > 1})
+        if duplicates:
+            raise ValueError(f"Template names must be unique: {', '.join(duplicates)}")
+        return self

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { api, formBody } from "@/lib/api/client";
 import { idOf } from "@/lib/api/path";
-import type { Created } from "@/lib/api/types";
+import type { Created, ScheduleTemplate, TemplatesSave } from "@/lib/api/types";
 
 // The Server Actions only pass the forms on to the API, which validates and saves.
 
@@ -74,24 +74,9 @@ function refreshTemplates() {
   revalidatePath("/shows/[id]", "page");
 }
 
-export async function addTemplate(formData: FormData) {
-  await api.post("/templates", formBody(formData, { checkboxes: ["repeatable"] }));
+// The editor sends the whole list; the answer has the IDs of new templates
+export async function saveTemplates(body: TemplatesSave): Promise<ScheduleTemplate[]> {
+  const list = await api.put<ScheduleTemplate[]>("/templates", body);
   refreshTemplates();
-}
-
-export async function saveTemplate(formData: FormData) {
-  const body = formBody(formData, { checkboxes: ["repeatable"], omit: ["id"] });
-  await api.put(`/templates/${idOf(formData.get("id"))}`, body);
-  refreshTemplates();
-}
-
-export async function deleteTemplate(formData: FormData) {
-  await api.delete(`/templates/${idOf(formData.get("id"))}`);
-  refreshTemplates();
-}
-
-// Swaps the position with the neighbour above or below
-export async function moveTemplate(formData: FormData) {
-  await api.post(`/templates/${idOf(formData.get("id"))}/move`, formBody(formData, { omit: ["id"] }));
-  refreshTemplates();
+  return list;
 }
