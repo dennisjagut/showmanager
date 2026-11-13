@@ -15,6 +15,12 @@ def backup() -> dict[str, object]:
             "schedule": table("show_schedule"),
             "guests": table("show_guests"),
             "scheduleTemplates": table("schedule_templates"),
+            "packingMarks": table("show_packing_marks"),
+        },
+        "masterdata": {
+            "packingLists": table("packing_lists"),
+            "packingListCategories": table("packing_list_categories"),
+            "packingListItems": table("packing_list_items"),
         },
         "calculator": {"items": table("calculator_items"), "inquiry": table("calculator_inquiry")},
     }

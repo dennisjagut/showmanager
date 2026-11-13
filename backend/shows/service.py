@@ -3,9 +3,25 @@
 import re
 
 from ..core.dates import today_iso
+from ..masterdata import repository as masterdata
+from ..masterdata.models import PackingList, PackingListCategory, PackingListItem
+from ..masterdata.service import group_items
 from . import repository
-from .models import Guest, ScheduleItem, ScheduleTemplate, Show
-from .schemas import GuestIn, MoveIn, ScheduleItemIn, ShowDetails, ShowIn, ShowList, ShowRow, TemplateIn
+from .models import Guest, PackingMarks, ScheduleItem, ScheduleTemplate, Show
+from .schemas import (
+    GuestIn,
+    MoveIn,
+    PackingMarkIn,
+    PackingGroup,
+    PackingItem,
+    ScheduleItemIn,
+    ShowDetails,
+    ShowIn,
+    ShowList,
+    ShowPacking,
+    ShowRow,
+    TemplateIn,
+)
 
 # The item names are free text in the band's language
 SHOWTIME = re.compile(r"show|konzert|auftritt|stage|concert", re.IGNORECASE)
@@ -27,15 +43,50 @@ def guest_count(guests: list[Guest]) -> int:
     return sum(1 + g.plus_ones for g in guests)
 
 
+def packing(
+    show: Show,
+    lists: dict[int, PackingList],
+    categories: list[PackingListCategory],
+    items: list[PackingListItem],
+    marks: PackingMarks,
+) -> ShowPacking | None:
+    """The show's packing list by category, with what is already packed for it and packed again after it"""
+    packing_list = lists.get(show.packing_list_id) if show.packing_list_id else None
+    if not packing_list:
+        return None
+    groups = group_items(
+        [c for c in categories if c.packing_list_id == packing_list.id],
+        [i for i in items if i.packing_list_id == packing_list.id],
+    )
+    return ShowPacking(
+        packing_list=packing_list,
+        groups=[
+            PackingGroup(
+                category=g.category,
+                items=[
+                    PackingItem(item=i, packed=i.id in marks.packed, repacked=i.id in marks.repacked) for i in g.items
+                ],
+            )
+            for g in groups
+            if g.items
+        ],
+    )
+
+
 def all_show_details() -> list[ShowDetails]:
-    """All shows by date with schedule and guest list"""
+    """All shows by date with schedule, guest list and packing list"""
     schedule = repository.find_schedule()
     guests = repository.find_guests()
+    lists = {p.id: p for p in masterdata.find_packing_lists()}
+    categories = masterdata.find_categories()
+    items = masterdata.find_items()
+    marks = repository.find_marks()
     return [
         ShowDetails(
             show=show,
             schedule=by_time([p for p in schedule if p.show_id == show.id]),
             guests=[g for g in guests if g.show_id == show.id],
+            packing=packing(show, lists, categories, items, marks.get(show.id, PackingMarks())),
         )
         for show in repository.find_all()
     ]
@@ -67,10 +118,18 @@ def show_details(show_id: int) -> ShowDetails | None:
     show: Show | None = repository.find_by_id(show_id)
     if not show:
         return None
+    packing_list = masterdata.find_packing_list(show.packing_list_id) if show.packing_list_id else None
     return ShowDetails(
         show=show,
         schedule=by_time(repository.find_schedule(show_id)),
         guests=repository.find_guests(show_id),
+        packing=packing(
+            show,
+            {packing_list.id: packing_list} if packing_list else {},
+            masterdata.find_categories(packing_list.id) if packing_list else [],
+            masterdata.find_items(packing_list.id) if packing_list else [],
+            repository.find_marks(show_id).get(show_id, PackingMarks()),
+        ),
     )
 
 
@@ -78,12 +137,20 @@ def tours() -> list[str]:
     return repository.find_tours()
 
 
+def show_values(body: ShowIn) -> dict[str, object]:
+    """A packing list that no longer exists (deleted meanwhile) is not saved"""
+    values = body.model_dump()
+    if body.packing_list_id and not masterdata.find_packing_list(body.packing_list_id):
+        values["packing_list_id"] = None
+    return values
+
+
 def create_show(body: ShowIn) -> int:
-    return repository.insert(body.model_dump())
+    return repository.insert(show_values(body))
 
 
 def update_show(show_id: int, body: ShowIn) -> None:
-    repository.update(show_id, body.model_dump())
+    repository.update(show_id, show_values(body))
 
 
 def delete_show(show_id: int) -> None:
@@ -130,6 +197,18 @@ def add_guest(show_id: int, body: GuestIn) -> None:
 
 def delete_guest(show_id: int, guest_id: int) -> None:
     repository.delete_guest(show_id, guest_id)
+
+
+# --- Packing list ----------------------------------------------------------------------------------------------------
+
+
+def set_mark(show_id: int, item_id: int, body: PackingMarkIn) -> None:
+    """Only items of the show's own packing list can be marked"""
+    show = repository.find_by_id(show_id)
+    if not show or not show.packing_list_id:
+        return
+    if any(i.id == item_id for i in masterdata.find_items(show.packing_list_id)):
+        repository.set_mark(show_id, item_id, body.stage, body.done)
 
 
 # --- Templates for the running order ---------------------------------------------------------------------------------

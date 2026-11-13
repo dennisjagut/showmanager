@@ -1,11 +1,19 @@
 import { useTranslations } from "next-intl";
 import { DataList, SelectField, TextAreaField, TextField } from "@/components/ui/Field";
 import { SubmitButton } from "@/components/ui/SubmitButton";
-import type { Show } from "@/lib/api/types";
+import type { PackingListSummary, Show } from "@/lib/api/types";
 import { saveShow } from "@/features/shows/actions";
 import { SHOW_STATUSES } from "@/features/shows/status";
 
-export function ShowForm({ show, tours }: { show?: Show; tours: string[] }) {
+export function ShowForm({
+  show,
+  tours,
+  packingLists,
+}: {
+  show?: Show;
+  tours: string[];
+  packingLists: PackingListSummary[];
+}) {
   const t = useTranslations("showForm");
   const ts = useTranslations("showStatus");
   const ti = useTranslations("showInfo");
@@ -117,6 +125,17 @@ export function ShowForm({ show, tours }: { show?: Show; tours: string[] }) {
             placeholder={t("notesPlaceholder")}
           />
         </div>
+        <SelectField
+          label={t("packingList")}
+          name="packingListId"
+          defaultValue={value("packingListId")}
+          hint={t("packingListHint")}
+          className="sm:max-w-xs"
+          options={[
+            { value: "", label: t("noPackingList") },
+            ...packingLists.map((p) => ({ value: p.packingList.id, label: p.packingList.name })),
+          ]}
+        />
       </fieldset>
 
       <SubmitButton className="btn-primary">{show ? t("saveChanges") : t("create")}</SubmitButton>

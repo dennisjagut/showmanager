@@ -33,6 +33,12 @@ RequiredText = Annotated[str, BeforeValidator(lambda v: v.strip() if isinstance(
 # Whole number ≥ 0 from a form field, e.g. a quota; empty becomes None
 OptionalCount = Annotated[Annotated[int, Field(ge=0)] | None, BeforeValidator(_empty_to_none)]
 
+# Number of pieces ≥ 1 from a form field; empty becomes None
+OptionalQuantity = Annotated[Annotated[int, Field(ge=1, le=999)] | None, BeforeValidator(_empty_to_none)]
+
+# ID of another entity from a select field; empty ("none selected") becomes None
+OptionalId = Annotated[Annotated[int, Field(ge=1)] | None, BeforeValidator(_empty_to_none)]
+
 # ISO date (YYYY-MM-DD) and time of day (HH:MM) as strings, the way they are stored
 IsoDate = Annotated[str, Field(pattern=r"^\d{4}-\d{2}-\d{2}$")]
 OptionalIsoDate = Annotated[IsoDate | None, BeforeValidator(_empty_to_none)]

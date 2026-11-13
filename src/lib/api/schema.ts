@@ -223,7 +223,7 @@ export interface paths {
         };
         /**
          * All Show Details
-         * @description All shows with schedule and guest list, e.g. for the CSV export
+         * @description All shows with schedule, guest list and packing list, e.g. for the CSV export
          */
         get: operations["all_show_details_api_v1_shows_details_get"];
         put?: never;
@@ -359,6 +359,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/shows/{show_id}/packing/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Packing Mark
+         * @description Checks an item of the show's packing list off (or not) as packed for the trip there or packed again after it
+         */
+        put: operations["set_packing_mark_api_v1_shows__show_id__packing__item_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/templates": {
         parameters: {
             query?: never;
@@ -409,6 +429,69 @@ export interface paths {
          * @description Swaps the position with the neighbour above or below
          */
         post: operations["move_template_api_v1_templates__template_id__move_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packing-lists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Packing Lists */
+        get: operations["packing_lists_api_v1_packing_lists_get"];
+        put?: never;
+        /** Create Packing List */
+        post: operations["create_packing_list_api_v1_packing_lists_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packing-lists/{list_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Packing List Details */
+        get: operations["packing_list_details_api_v1_packing_lists__list_id__get"];
+        /**
+         * Save Packing List
+         * @description Saves the whole list: entries without an ID are added, missing ones deleted. Returns the saved list.
+         */
+        put: operations["save_packing_list_api_v1_packing_lists__list_id__put"];
+        post?: never;
+        /**
+         * Delete Packing List
+         * @description Shows that used the list no longer have a packing list
+         */
+        delete: operations["delete_packing_list_api_v1_packing_lists__list_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/packing-lists/{list_id}/copy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Copy Packing List
+         * @description New list with the given name and all categories and items of this one
+         */
+        post: operations["copy_packing_list_api_v1_packing_lists__list_id__copy_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -977,6 +1060,132 @@ export interface components {
             /** Newpassword */
             newPassword: string;
         };
+        /** PackingGroup */
+        PackingGroup: {
+            category: components["schemas"]["PackingListCategory"] | null;
+            /** Items */
+            items: components["schemas"]["PackingItem"][];
+        };
+        /** PackingItem */
+        PackingItem: {
+            item: components["schemas"]["PackingListItem"];
+            /** Packed */
+            packed: boolean;
+            /** Repacked */
+            repacked: boolean;
+        };
+        /** PackingList */
+        PackingList: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Createdat */
+            createdAt: string;
+            /** Updatedat */
+            updatedAt: string;
+        };
+        /**
+         * PackingListCategory
+         * @description Section of a packing list, e.g. Kabel, Instrumente, Drums
+         */
+        PackingListCategory: {
+            /** Id */
+            id: number;
+            /** Packinglistid */
+            packingListId: number;
+            /** Name */
+            name: string;
+            /** Sortorder */
+            sortOrder: number;
+        };
+        /** PackingListCategoryIn */
+        PackingListCategoryIn: {
+            /** Id */
+            id?: number | null;
+            /** Name */
+            name: string;
+            /**
+             * Items
+             * @default []
+             */
+            items: components["schemas"]["PackingListItemIn"][];
+        };
+        /** PackingListDetails */
+        PackingListDetails: {
+            packingList: components["schemas"]["PackingList"];
+            /** Groups */
+            groups: components["schemas"]["PackingListGroup"][];
+        };
+        /** PackingListGroup */
+        PackingListGroup: {
+            category: components["schemas"]["PackingListCategory"] | null;
+            /** Items */
+            items: components["schemas"]["PackingListItem"][];
+        };
+        /** PackingListIn */
+        PackingListIn: {
+            /** Name */
+            name: string;
+        };
+        /** PackingListItem */
+        PackingListItem: {
+            /** Id */
+            id: number;
+            /** Packinglistid */
+            packingListId: number;
+            /** Categoryid */
+            categoryId: number | null;
+            /** Name */
+            name: string;
+            /** Quantity */
+            quantity: number;
+            /** Sortorder */
+            sortOrder: number;
+        };
+        /** PackingListItemIn */
+        PackingListItemIn: {
+            /** Id */
+            id?: number | null;
+            /** Name */
+            name: string;
+            /** Quantity */
+            quantity?: number | null;
+        };
+        /**
+         * PackingListSaveIn
+         * @description The whole list as it should be afterwards: what is missing is deleted, what has no ID is added
+         */
+        PackingListSaveIn: {
+            /** Name */
+            name: string;
+            /**
+             * Uncategorized
+             * @default []
+             */
+            uncategorized: components["schemas"]["PackingListItemIn"][];
+            /**
+             * Categories
+             * @default []
+             */
+            categories: components["schemas"]["PackingListCategoryIn"][];
+        };
+        /** PackingListSummary */
+        PackingListSummary: {
+            packingList: components["schemas"]["PackingList"];
+            /** Itemcount */
+            itemCount: number;
+        };
+        /** PackingMarkIn */
+        PackingMarkIn: {
+            /**
+             * Stage
+             * @enum {string}
+             */
+            stage: "packed" | "repacked";
+            /** Done */
+            done: boolean;
+        };
         /** PasswordIn */
         PasswordIn: {
             /** Password */
@@ -1062,6 +1271,8 @@ export interface components {
             tech: string | null;
             /** Notes */
             notes: string | null;
+            /** Packinglistid */
+            packingListId: number | null;
             /** Createdat */
             createdAt: string;
             /** Updatedat */
@@ -1074,6 +1285,7 @@ export interface components {
             schedule: components["schemas"]["ScheduleItem"][];
             /** Guests */
             guests: components["schemas"]["Guest"][];
+            packing: components["schemas"]["ShowPacking"] | null;
         };
         /** ShowIn */
         ShowIn: {
@@ -1111,6 +1323,8 @@ export interface components {
             tech?: string | null;
             /** Notes */
             notes?: string | null;
+            /** Packinglistid */
+            packingListId?: number | null;
         };
         /** ShowList */
         ShowList: {
@@ -1123,6 +1337,12 @@ export interface components {
             tours: string[];
             /** Shows */
             shows: components["schemas"]["ShowRow"][];
+        };
+        /** ShowPacking */
+        ShowPacking: {
+            packingList: components["schemas"]["PackingList"];
+            /** Groups */
+            groups: components["schemas"]["PackingGroup"][];
         };
         /** ShowRow */
         ShowRow: {
@@ -2000,6 +2220,42 @@ export interface operations {
             };
         };
     };
+    set_packing_mark_api_v1_shows__show_id__packing__item_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                show_id: number;
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PackingMarkIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     templates_api_v1_templates_get: {
         parameters: {
             query?: never;
@@ -2141,6 +2397,191 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    packing_lists_api_v1_packing_lists_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackingListSummary"][];
+                };
+            };
+        };
+    };
+    create_packing_list_api_v1_packing_lists_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PackingListIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Created"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    packing_list_details_api_v1_packing_lists__list_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                list_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackingListDetails"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_packing_list_api_v1_packing_lists__list_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                list_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PackingListSaveIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PackingListDetails"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_packing_list_api_v1_packing_lists__list_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                list_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    copy_packing_list_api_v1_packing_lists__list_id__copy_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                list_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PackingListIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Created"];
                 };
             };
             /** @description Validation Error */

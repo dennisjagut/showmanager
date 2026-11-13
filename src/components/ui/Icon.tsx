@@ -6,6 +6,7 @@ const PATHS = {
   sliders: "M4 6h9M17 6h3M15 4v4M4 12h3M11 12h9M9 10v4M4 18h11M19 18h1M17 16v4",
   left: "M15 6l-6 6 6 6",
   right: "M9 6l6 6-6 6",
+  check: "M5 12l5 5L20 7",
 };
 
 export type IconName = keyof typeof PATHS;

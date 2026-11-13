@@ -6,6 +6,9 @@ from ..core.base import ApiModel
 
 ShowStatus = Literal["option", "confirmed", "cancelled"]
 
+# Packed for the trip to the show, or packed again after it
+PackingStage = Literal["packed", "repacked"]
+
 
 class Show(ApiModel):
     id: int
@@ -29,6 +32,8 @@ class Show(ApiModel):
     # Technical details & backline
     tech: str | None
     notes: str | None
+    # Packing list from the master data, see masterdata
+    packing_list_id: int | None
     created_at: str
     updated_at: str
 
@@ -57,3 +62,10 @@ class ScheduleTemplate(ApiModel):
     sort_order: int
     # May occur several times per show and is then numbered (Support 1, Support 2 …)
     repeatable: bool
+
+
+class PackingMarks(ApiModel):
+    """IDs of the packing list items of one show that are checked off, per stage (table show_packing_marks)"""
+
+    packed: set[int] = set()
+    repacked: set[int] = set()
