@@ -7,10 +7,10 @@ from fastapi import APIRouter, HTTPException, Path
 from ..core.base import Created
 from . import service
 from .schemas import (
-    ApplicationIn,
     FestivalDetails,
     FestivalIn,
     FestivalList,
+    FestivalSaveIn,
     Overview,
     OverviewFilters,
     Seasons,
@@ -68,8 +68,12 @@ def create_festival(body: FestivalIn) -> Created:
 
 
 @router.put("/festivals/{festival_id}")
-def update_festival(festival_id: int, body: FestivalIn) -> None:
-    service.update_festival(festival_id, body)
+def save_festival(festival_id: int, body: FestivalSaveIn) -> FestivalDetails:
+    """Saves the festival with all its applications: seasons that are missing are deleted"""
+    details = service.save_festival(festival_id, body)
+    if not details:
+        raise HTTPException(status_code=404, detail="Festival not found")
+    return details
 
 
 @router.delete("/festivals/{festival_id}")
@@ -77,18 +81,7 @@ def delete_festival(festival_id: int) -> None:
     service.delete_festival(festival_id)
 
 
-@router.put("/festivals/{festival_id}/applications/{season}")
-def save_application(festival_id: int, season: Season, body: ApplicationIn) -> None:
-    """Creates or updates the application of one season. "applied" without a date gets today."""
-    service.save_application(festival_id, season, body)
-
-
 @router.put("/festivals/{festival_id}/applications/{season}/status")
 def set_status(festival_id: int, season: Season, body: StatusIn) -> None:
     """Quick status change from the overview. "applied" sets today as the date, an existing date is kept."""
     service.set_status(festival_id, season, body)
-
-
-@router.delete("/festivals/{festival_id}/applications/{season}")
-def delete_application(festival_id: int, season: Season) -> None:
-    service.delete_application(festival_id, season)

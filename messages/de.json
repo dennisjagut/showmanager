@@ -18,7 +18,19 @@
     "delete": "{name} löschen",
     "yes": "ja",
     "no": "nein",
-    "saved": "Gespeichert ✓"
+    "saved": "Gespeichert ✓",
+    "discard": "Verwerfen",
+    "undo": "Rückgängig",
+    "new": "Neu",
+    "changed": "geändert",
+    "saving": "Wird gespeichert …",
+    "unsaved": "Ungespeicherte Änderungen",
+    "unsavedChanges": "{count, plural, one {# ungespeicherte Änderung} other {# ungespeicherte Änderungen}}",
+    "checkFields": "{count, plural, one {# Feld prüfen} other {# Felder prüfen}}",
+    "saveError": "Nicht gespeichert. Bitte die Eingaben prüfen und nochmal versuchen.",
+    "saveShortcut": "Strg + S oder ⌘ + S",
+    "cancel": "Abbrechen",
+    "nameRequired": "Bitte einen Namen eingeben."
   },
   "errors": {
     "title": "Da ist etwas schiefgegangen",
@@ -138,19 +150,20 @@
     "applications": "Bewerbungen",
     "noApplications": "Noch keine Bewerbung erfasst – Status ist überall „{status}“.",
     "addSeason": "Bewerbung für Saison anlegen",
-    "create": "Anlegen",
     "masterData": "Stammdaten",
     "deleteConfirm": "„{name}“ inklusive aller Bewerbungen löschen? Tipp: Für Festivals, die es nicht mehr gibt, reicht „inaktiv“.",
     "delete": "Festival endgültig löschen",
     "season": "Saison {season}",
-    "deadlineLabel": "Deadline:",
     "status": "Status",
     "statusOption": "{label} – {hint}",
     "appliedOn": "Beworben am",
     "note": "Notiz",
     "notePlaceholder": "z. B. per Mail an … geschickt, nachhaken im Januar",
-    "remove": "Bewerbung entfernen",
-    "removeConfirm": "Bewerbung für Saison {season} entfernen?"
+    "removeSeason": "Bewerbung für Saison {season} entfernen",
+    "removed": "Bewerbung für Saison {season} wird beim Speichern entfernt",
+    "noApplicationsYet": "Noch keine Bewerbung erfasst.",
+    "editTitle": "{name} bearbeiten",
+    "noMasterData": "Noch keine weiteren Angaben."
   },
   "festivalForm": {
     "name": "Name *",
@@ -165,7 +178,6 @@
     "contactPlaceholder": "E-Mail, Formular-Link, Ansprechpartner …",
     "notes": "Hinweise",
     "active": "Festival existiert noch (aktiv)",
-    "saveChanges": "Änderungen speichern",
     "create": "Festival anlegen"
   },
   "data": {
@@ -379,10 +391,11 @@
     "moveUp": "{name} nach oben",
     "moveDown": "{name} nach unten",
     "repeatable": "mehrfach",
-    "deleteConfirm": "Vorlage „{name}“ löschen? Bereits eingetragene Abläufe bleiben erhalten.",
     "empty": "Noch keine Vorlagen.",
     "new": "Neue Vorlage",
-    "newPlaceholder": "z. B. Meet & Greet"
+    "newPlaceholder": "z. B. Meet & Greet",
+    "duplicate": "„{name}“ gibt es schon.",
+    "removed": "„{name}“ wird beim Speichern entfernt"
   },
   "calculator": {
     "title": "Gig-Kalkulator",
@@ -584,8 +597,6 @@
     "categoryDeleteConfirm": "Kategorie „{name}“ mit {count, plural, one {# Teil} other {# Teilen}} löschen? Endgültig weg ist sie erst nach dem Speichern.",
     "newCategory": "Neue Kategorie",
     "newCategoryPlaceholder": "z. B. Kabel, Instrumente, Drums",
-    "addCategory": "Kategorie anlegen",
-    "unsaved": "Ungespeicherte Änderungen",
-    "saveError": "Nicht gespeichert. Bitte die Eingaben prüfen und nochmal versuchen."
+    "addCategory": "Kategorie anlegen"
   }
 }

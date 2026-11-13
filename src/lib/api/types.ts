@@ -9,6 +9,7 @@ export type ApplicationWithDeadline = Schemas["ApplicationWithDeadline"];
 export type Deadline = Schemas["Deadline"];
 export type Overview = Schemas["Overview"];
 export type FestivalDetails = Schemas["FestivalDetails"];
+export type FestivalSave = Schemas["FestivalSaveIn"];
 export type FestivalList = Schemas["FestivalList"];
 export type Seasons = Schemas["Seasons"];
 
@@ -16,6 +17,7 @@ export type Show = Schemas["Show"];
 export type ScheduleItem = Schemas["ScheduleItem"];
 export type Guest = Schemas["Guest"];
 export type ScheduleTemplate = Schemas["ScheduleTemplate"];
+export type TemplatesSave = Schemas["TemplatesSaveIn"];
 export type ShowDetails = Schemas["ShowDetails"];
 export type ShowList = Schemas["ShowList"];
 export type ShowPacking = Schemas["ShowPacking"];

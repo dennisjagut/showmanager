@@ -149,7 +149,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
             {f.deadline && (
               <div className="text-xs">
                 <span className="text-zinc-500">{t("deadlineLabel")} </span>
-                <Deadline text={f.deadline} info={deadline} highlight={status === "open"} />
+                <Deadline text={f.deadline} info={deadline} highlight={status === "open"} inline />
               </div>
             )}
             {f.contact && (

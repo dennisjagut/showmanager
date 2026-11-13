@@ -1,6 +1,8 @@
 """What the API receives and returns. The entities themselves are in models.py."""
 
-from typing import Literal
+from typing import Annotated, Literal
+
+from pydantic import Field, model_validator
 
 from ..core.base import ApiModel, OptionalIsoDate, OptionalText, RequiredText
 from .models import Application, ApplicationStatus, Festival
@@ -88,9 +90,23 @@ class FestivalIn(ApiModel):
 
 
 class ApplicationIn(ApiModel):
+    season: Annotated[int, Field(ge=2000, le=2100)]
     status: ApplicationStatus
     applied_on: OptionalIsoDate = None
     note: OptionalText = None
+
+
+class FestivalSaveIn(FestivalIn):
+    """The festival with all its applications as they should be afterwards: seasons that are missing are deleted"""
+
+    applications: list[ApplicationIn]
+
+    @model_validator(mode="after")
+    def unique_seasons(self) -> "FestivalSaveIn":
+        seasons = [a.season for a in self.applications]
+        if len(seasons) != len(set(seasons)):
+            raise ValueError("Each season may only have one application")
+        return self
 
 
 class StatusIn(ApiModel):

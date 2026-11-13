@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from ..core.base import Created
 from . import service
 from .models import ScheduleTemplate
-from .schemas import GuestIn, MoveIn, PackingMarkIn, ScheduleItemIn, ShowDetails, ShowIn, ShowList, TemplateIn
+from .schemas import GuestIn, PackingMarkIn, ScheduleItemIn, ShowDetails, ShowIn, ShowList, TemplatesSaveIn
 
 router = APIRouter(tags=["shows"])
 
@@ -81,22 +81,7 @@ def templates() -> list[ScheduleTemplate]:
     return service.templates()
 
 
-@router.post("/templates")
-def add_template(body: TemplateIn) -> None:
-    service.add_template(body)
-
-
-@router.put("/templates/{template_id}")
-def save_template(template_id: int, body: TemplateIn) -> None:
-    service.save_template(template_id, body)
-
-
-@router.delete("/templates/{template_id}")
-def delete_template(template_id: int) -> None:
-    service.delete_template(template_id)
-
-
-@router.post("/templates/{template_id}/move")
-def move_template(template_id: int, body: MoveIn) -> None:
-    """Swaps the position with the neighbour above or below"""
-    service.move_template(template_id, body)
+@router.put("/templates")
+def save_templates(body: TemplatesSaveIn) -> list[ScheduleTemplate]:
+    """Saves all templates at once, in this order: what is missing is deleted, what has no ID is added"""
+    return service.save_templates(body)

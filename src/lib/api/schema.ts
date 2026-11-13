@@ -146,8 +146,11 @@ export interface paths {
         };
         /** Festival Details */
         get: operations["festival_details_api_v1_festivals__festival_id__get"];
-        /** Update Festival */
-        put: operations["update_festival_api_v1_festivals__festival_id__put"];
+        /**
+         * Save Festival
+         * @description Saves the festival with all its applications: seasons that are missing are deleted
+         */
+        put: operations["save_festival_api_v1_festivals__festival_id__put"];
         post?: never;
         /** Delete Festival */
         delete: operations["delete_festival_api_v1_festivals__festival_id__delete"];
@@ -168,27 +171,6 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/festivals/{festival_id}/applications/{season}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Save Application
-         * @description Creates or updates the application of one season. "applied" without a date gets today.
-         */
-        put: operations["save_application_api_v1_festivals__festival_id__applications__season__put"];
-        post?: never;
-        /** Delete Application */
-        delete: operations["delete_application_api_v1_festivals__festival_id__applications__season__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -388,47 +370,12 @@ export interface paths {
         };
         /** Templates */
         get: operations["templates_api_v1_templates_get"];
-        put?: never;
-        /** Add Template */
-        post: operations["add_template_api_v1_templates_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/templates/{template_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Save Template */
-        put: operations["save_template_api_v1_templates__template_id__put"];
-        post?: never;
-        /** Delete Template */
-        delete: operations["delete_template_api_v1_templates__template_id__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/templates/{template_id}/move": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
         /**
-         * Move Template
-         * @description Swaps the position with the neighbour above or below
+         * Save Templates
+         * @description Saves all templates at once, in this order: what is missing is deleted, what has no ID is added
          */
-        post: operations["move_template_api_v1_templates__template_id__move_post"];
+        put: operations["save_templates_api_v1_templates_put"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -721,6 +668,8 @@ export interface components {
         };
         /** ApplicationIn */
         ApplicationIn: {
+            /** Season */
+            season: number;
             /**
              * Status
              * @enum {string}
@@ -959,6 +908,35 @@ export interface components {
             festival: components["schemas"]["Festival"];
             application: components["schemas"]["Application"] | null;
         };
+        /**
+         * FestivalSaveIn
+         * @description The festival with all its applications as they should be afterwards: seasons that are missing are deleted
+         */
+        FestivalSaveIn: {
+            /** Name */
+            name: string;
+            /** Location */
+            location?: string | null;
+            /** State */
+            state?: string | null;
+            /** Month */
+            month?: string | null;
+            /** Website */
+            website?: string | null;
+            /** Deadline */
+            deadline?: string | null;
+            /** Contact */
+            contact?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Active
+             * @default true
+             */
+            active: boolean;
+            /** Applications */
+            applications: components["schemas"]["ApplicationIn"][];
+        };
         /** Guest */
         Guest: {
             /** Id */
@@ -1001,14 +979,6 @@ export interface components {
         LoginOut: {
             /** Token */
             token: string;
-        };
-        /** MoveIn */
-        MoveIn: {
-            /**
-             * Direction
-             * @enum {string}
-             */
-            direction: "up" | "down";
         };
         /** NewCalculatorItemIn */
         NewCalculatorItemIn: {
@@ -1362,6 +1332,8 @@ export interface components {
         };
         /** TemplateIn */
         TemplateIn: {
+            /** Id */
+            id?: number | null;
             /** Name */
             name: string;
             /**
@@ -1369,6 +1341,17 @@ export interface components {
              * @default false
              */
             repeatable: boolean;
+        };
+        /**
+         * TemplatesSaveIn
+         * @description All templates as they should be afterwards, in this order: what is missing is deleted, what has no ID is added
+         */
+        TemplatesSaveIn: {
+            /**
+             * Templates
+             * @default []
+             */
+            templates: components["schemas"]["TemplateIn"][];
         };
         /** UserIn */
         UserIn: {
@@ -1694,7 +1677,7 @@ export interface operations {
             };
         };
     };
-    update_festival_api_v1_festivals__festival_id__put: {
+    save_festival_api_v1_festivals__festival_id__put: {
         parameters: {
             query?: never;
             header?: never;
@@ -1705,7 +1688,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["FestivalIn"];
+                "application/json": components["schemas"]["FestivalSaveIn"];
             };
         };
         responses: {
@@ -1715,7 +1698,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["FestivalDetails"];
                 };
             };
             /** @description Validation Error */
@@ -1776,74 +1759,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Seasons"];
-                };
-            };
-        };
-    };
-    save_application_api_v1_festivals__festival_id__applications__season__put: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                festival_id: number;
-                season: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ApplicationIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    delete_application_api_v1_festivals__festival_id__applications__season__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                festival_id: number;
-                season: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2276,7 +2191,7 @@ export interface operations {
             };
         };
     };
-    add_template_api_v1_templates_post: {
+    save_templates_api_v1_templates_put: {
         parameters: {
             query?: never;
             header?: never;
@@ -2285,7 +2200,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TemplateIn"];
+                "application/json": components["schemas"]["TemplatesSaveIn"];
             };
         };
         responses: {
@@ -2295,108 +2210,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    save_template_api_v1_templates__template_id__put: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                template_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TemplateIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    delete_template_api_v1_templates__template_id__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                template_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    move_template_api_v1_templates__template_id__move_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                template_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MoveIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ScheduleTemplate"][];
                 };
             };
             /** @description Validation Error */

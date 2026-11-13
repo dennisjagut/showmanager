@@ -1,11 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useTransition } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { TextField } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
-import { Spinner } from "@/components/ui/Spinner";
+import { MoveButtons } from "@/components/ui/MoveButtons";
+import { SaveBar } from "@/components/ui/SaveBar";
+import { useDraft } from "@/components/ui/use-draft";
 import { savePackingList } from "@/features/masterdata/actions";
 import {
   UNCATEGORIZED,
@@ -14,84 +16,33 @@ import {
   itemsOf,
   newKey,
   saveBody,
-  swap,
   withItems,
   type ItemDraft,
-  type PackingListDraft,
 } from "@/features/masterdata/draft";
 import type { PackingListDetails } from "@/lib/api/types";
-import { cn } from "@/lib/cn";
+import { swap } from "@/lib/lists";
 
-const MOVE = "px-1 text-xs leading-none text-zinc-500 hover:text-zinc-900 disabled:opacity-20 dark:hover:text-zinc-100";
-const REMOVE = "btn-danger shrink-0 px-2 py-1.5";
-
-function MoveButtons({
-  index,
-  count,
-  name,
-  onMove,
-}: {
-  index: number;
-  count: number;
-  name: string;
-  onMove: (direction: -1 | 1) => void;
-}) {
-  const t = useTranslations("packingLists");
-  return (
-    <div className="flex shrink-0 flex-col">
-      <button
-        type="button"
-        disabled={index === 0}
-        onClick={() => onMove(-1)}
-        aria-label={t("moveUp", { name })}
-        className={MOVE}
-      >
-        ▲
-      </button>
-      <button
-        type="button"
-        disabled={index === count - 1}
-        onClick={() => onMove(1)}
-        aria-label={t("moveDown", { name })}
-        className={MOVE}
-      >
-        ▼
-      </button>
-    </div>
-  );
-}
+const REMOVE = "btn-danger shrink-0 px-2 py-1.5 pointer-coarse:min-h-11 pointer-coarse:min-w-11";
 
 /**
- * Name, categories and items of a packing list. Everything is changed here first and saved together with one button;
- * leaving the page with unsaved changes asks first.
+ * Name, categories and items of a packing list. Everything is changed here first and saved together with one button
+ * (see useDraft); leaving the page with unsaved changes asks first.
  */
 export function PackingListEditor({ details }: { details: PackingListDetails }) {
   const t = useTranslations("packingLists");
   const tc = useTranslations("common");
   const listId = details.packingList.id;
-  const [saved, setSaved] = useState(() => draftFrom(details));
-  const [draft, setDraft] = useState(saved);
-  const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
-  const [saving, startSaving] = useTransition();
+  const editor = useDraft({
+    initial: draftFrom(details),
+    save: async (draft) => draftFrom(await savePackingList(listId, saveBody(draft))),
+    compare: isChanged,
+  });
+  const { draft, update } = editor;
   // Text of the "add item" field per group, and of the "add category" field
   const [newItems, setNewItems] = useState<Record<string, string>>({});
   const [newCategory, setNewCategory] = useState("");
   // Group whose "add item" field gets the focus, e.g. right after adding the category
   const [focusGroup, setFocusGroup] = useState<string | null>(null);
-  const changed = isChanged(draft, saved);
-
-  useEffect(() => {
-    if (!changed) return;
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [changed]);
-
-  function update(next: PackingListDraft) {
-    setDraft(next);
-    setStatus("idle");
-  }
-
   function updateItem(group: string, key: string, changes: Partial<ItemDraft>) {
     update(
       withItems(
@@ -129,20 +80,6 @@ export function PackingListEditor({ details }: { details: PackingListDetails }) 
     update({ ...draft, categories: draft.categories.filter((c) => c.key !== key) });
   }
 
-  function save(e: React.FormEvent) {
-    e.preventDefault();
-    startSaving(async () => {
-      try {
-        const next = draftFrom(await savePackingList(listId, saveBody(draft)));
-        setSaved(next);
-        setDraft(next);
-        setStatus("saved");
-      } catch {
-        setStatus("error");
-      }
-    });
-  }
-
   const hasCategories = draft.categories.length > 0;
 
   function items(group: string) {
@@ -156,7 +93,7 @@ export function PackingListEditor({ details }: { details: PackingListDetails }) 
                 <MoveButtons
                   index={index}
                   count={list.length}
-                  name={item.name}
+                  labels={{ up: t("moveUp", { name: item.name }), down: t("moveDown", { name: item.name }) }}
                   onMove={(direction) => update(withItems(draft, group, swap(list, index, direction)))}
                 />
                 <input
@@ -222,8 +159,8 @@ export function PackingListEditor({ details }: { details: PackingListDetails }) 
   }
 
   return (
-    <form onSubmit={save} className="space-y-4">
-      <fieldset disabled={saving} className="space-y-4">
+    <form {...editor.form} className="space-y-4">
+      <fieldset disabled={editor.saving} className="space-y-4">
         <TextField
           label={t("rename")}
           value={draft.name}
@@ -247,7 +184,7 @@ export function PackingListEditor({ details }: { details: PackingListDetails }) 
               <MoveButtons
                 index={index}
                 count={draft.categories.length}
-                name={category.name}
+                labels={{ up: t("moveUp", { name: category.name }), down: t("moveDown", { name: category.name }) }}
                 onMove={(direction) => update({ ...draft, categories: swap(draft.categories, index, direction) })}
               />
               <input
@@ -301,33 +238,7 @@ export function PackingListEditor({ details }: { details: PackingListDetails }) 
         </Card>
       </fieldset>
 
-      <div
-        className="sticky z-10 flex items-center justify-end gap-3 card py-3 shadow-lg"
-        style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
-      >
-        <span
-          role="status"
-          className={cn(
-            "flex-1 text-sm",
-            status === "error" ? "text-rose-600" : changed ? "text-amber-600" : "text-zinc-500",
-          )}
-        >
-          {status === "error" ? t("saveError") : changed ? t("unsaved") : status === "saved" ? tc("saved") : ""}
-        </span>
-        <button
-          type="submit"
-          disabled={saving || !changed}
-          aria-busy={saving}
-          className="relative btn-primary disabled:opacity-50"
-        >
-          {saving && (
-            <span className="absolute inset-0 flex items-center justify-center">
-              <Spinner />
-            </span>
-          )}
-          <span className={saving ? "invisible" : ""}>{tc("save")}</span>
-        </button>
-      </div>
+      <SaveBar status={editor.status} onDiscard={editor.discard} />
     </form>
   );
 }

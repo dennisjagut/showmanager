@@ -10,7 +10,6 @@ from . import repository
 from .models import Guest, PackingMarks, ScheduleItem, ScheduleTemplate, Show
 from .schemas import (
     GuestIn,
-    MoveIn,
     PackingMarkIn,
     PackingGroup,
     PackingItem,
@@ -20,7 +19,7 @@ from .schemas import (
     ShowList,
     ShowPacking,
     ShowRow,
-    TemplateIn,
+    TemplatesSaveIn,
 )
 
 # The item names are free text in the band's language
@@ -218,30 +217,18 @@ def templates() -> list[ScheduleTemplate]:
     return repository.find_templates()
 
 
-def add_template(body: TemplateIn) -> None:
-    repository.insert_template(body.name, body.repeatable)
-
-
-def save_template(template_id: int, body: TemplateIn) -> None:
-    # Renaming to the name of another template would break the unique name, so the old name stays
-    other = repository.find_template_by_name(body.name)
-    name = None if other and other.id != template_id else body.name
-    repository.update_template(template_id, name, body.repeatable)
-
-
-def delete_template(template_id: int) -> None:
-    repository.delete_template(template_id)
-
-
-def move_template(template_id: int, body: MoveIn) -> None:
-    """Swaps the position with the neighbour above or below"""
-    ids = [t.id for t in repository.find_templates()]
-    if template_id not in ids:
-        return
-    i = ids.index(template_id)
-    j = i + (-1 if body.direction == "up" else 1)
-    if j < 0 or j >= len(ids):
-        return
-    ids[i], ids[j] = ids[j], ids[i]
-    # Reassign the whole order, so that equal values are resolved cleanly too
-    repository.save_template_order(ids)
+def save_templates(body: TemplatesSaveIn) -> list[ScheduleTemplate]:
+    """
+    Saves the whole list of templates and returns it with the IDs of new ones. IDs that no longer exist (e.g. deleted
+    in a second tab meanwhile) are added as new; an ID sent twice is kept only by the first.
+    """
+    existing = {t.id for t in repository.find_templates()}
+    seen: set[int] = set()
+    templates = []
+    for t in body.templates:
+        keep = t.id in existing and t.id not in seen
+        if keep and t.id is not None:
+            seen.add(t.id)
+        templates.append(t if keep else t.model_copy(update={"id": None}))
+    repository.save_templates(templates)
+    return repository.find_templates()

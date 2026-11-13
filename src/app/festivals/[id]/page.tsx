@@ -1,18 +1,19 @@
-import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { SelectField, TextAreaField, TextField } from "@/components/ui/Field";
+import { Facts, type Fact } from "@/components/ui/Facts";
 import { Notice } from "@/components/ui/Notice";
 import { Page, PageHeader } from "@/components/ui/Page";
-import { SubmitButton } from "@/components/ui/SubmitButton";
-import { deleteApplication, deleteFestival, saveApplication } from "@/features/applications/actions";
+import { deleteFestival } from "@/features/applications/actions";
 import { Contact, WebsiteLink } from "@/features/applications/components/Contact";
 import { Deadline } from "@/features/applications/components/Deadline";
-import { FestivalForm } from "@/features/applications/components/FestivalForm";
+import { FestivalEditor } from "@/features/applications/components/FestivalEditor";
 import { getFestival } from "@/features/applications/api";
-import { APPLICATION_STATUSES, APPLICATION_STATUS_TONE } from "@/features/applications/status";
+import { APPLICATION_STATUS_TONE } from "@/features/applications/status";
 import type { ApplicationWithDeadline } from "@/lib/api/types";
+import { formatDate } from "@/lib/dates";
 import { type SearchParams, param } from "@/lib/search-params";
 
 export const dynamic = "force-dynamic";
@@ -22,12 +23,14 @@ type Props = {
   searchParams: Promise<SearchParams>;
 };
 
+// A festival opens as a read view; "Bearbeiten" switches the same page to the edit mode (?bearbeiten=1)
 export default async function FestivalPage({ params, searchParams }: Props) {
   const { id } = await params;
   const sp = await searchParams;
-  const [data, t, tc, ts] = await Promise.all([
+  const [data, t, tf, tc, ts] = await Promise.all([
     getFestival(id),
     getTranslations("festival"),
+    getTranslations("festivalForm"),
     getTranslations("common"),
     getTranslations("applicationStatus"),
   ]);
@@ -36,8 +39,24 @@ export default async function FestivalPage({ params, searchParams }: Props) {
   // The season the overview showed, for the back link and as the suggestion for a new application
   const requested = Number(param(sp, "season"));
   const season = seasons.all.includes(requested) ? requested : seasons.current;
-  const existing = new Set(applications.map((a) => a.season));
-  const newSeasons = seasons.all.filter((s) => !existing.has(s));
+  const readHref = `/festivals/${f.id}?season=${season}`;
+
+  if (param(sp, "bearbeiten") === "1") {
+    return (
+      <Page>
+        <PageHeader title={t("editTitle", { name: f.name })} />
+        {/* A new key for another festival, so the editor does not keep the draft of the previous one */}
+        <FestivalEditor key={f.id} details={data} season={season} readHref={readHref} />
+      </Page>
+    );
+  }
+
+  const facts: Fact[] = [
+    { label: tf("deadline"), value: f.deadline },
+    { label: tf("contact"), value: f.contact && <Contact text={f.contact} /> },
+    { label: tf("website"), value: f.website && <WebsiteLink url={f.website} /> },
+    { label: tf("notes"), value: f.notes && <span className="whitespace-pre-line">{f.notes}</span> },
+  ];
 
   return (
     <Page>
@@ -49,16 +68,15 @@ export default async function FestivalPage({ params, searchParams }: Props) {
             {!f.active && <span className="ml-2 align-middle text-sm font-normal text-rose-600">{t("inactive")}</span>}
           </>
         }
-        description={
+        description={[f.location, f.state, f.month].filter(Boolean).join(" · ")}
+        actions={
           <>
-            <p>{[f.location, f.state, f.month].filter(Boolean).join(" · ")}</p>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-zinc-900 dark:text-zinc-100">
-              <WebsiteLink url={f.website} />
-              <Contact text={f.contact} />
-            </div>
+            {param(sp, "saved") && <Notice>{tc("saved")}</Notice>}
+            <Link href={`${readHref}&bearbeiten=1`} className="btn-secondary pointer-coarse:min-h-11">
+              {tc("edit")}
+            </Link>
           </>
         }
-        actions={param(sp, "saved") && <Notice>{tc("saved")}</Notice>}
       />
 
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
@@ -70,27 +88,16 @@ export default async function FestivalPage({ params, searchParams }: Props) {
           {applications.length === 0 && (
             <p className="text-sm text-zinc-500">{t("noApplications", { status: ts("open") })}</p>
           )}
-          {newSeasons.length > 0 && (
-            <Card dashed className="p-3">
-              <form action={saveApplication} className="flex flex-wrap items-end gap-2">
-                <input type="hidden" name="festivalId" value={f.id} />
-                <input type="hidden" name="status" value="open" />
-                <SelectField
-                  label={t("addSeason")}
-                  name="season"
-                  inputClassName="py-1.5"
-                  defaultValue={newSeasons.includes(season) ? season : undefined}
-                  options={newSeasons.map((s) => ({ value: s, label: String(s) }))}
-                />
-                <SubmitButton className="btn-secondary">{t("create")}</SubmitButton>
-              </form>
-            </Card>
-          )}
         </section>
 
         <section className="space-y-3">
-          <Card title={t("masterData")}>
-            <FestivalForm festival={f} />
+          <h2 className="section-title">{t("masterData")}</h2>
+          <Card>
+            {facts.some((fact) => fact.value) ? (
+              <Facts items={facts} />
+            ) : (
+              <p className="text-sm text-zinc-500">{t("noMasterData")}</p>
+            )}
           </Card>
           <ActionButton
             action={deleteFestival}
@@ -115,61 +122,27 @@ async function ApplicationCard({
   // free text of the festival
   deadline: string | null;
 }) {
-  const [t, ts, th, tc] = await Promise.all([
+  const [t, tf, ts, locale] = await Promise.all([
     getTranslations("festival"),
+    getTranslations("festivalForm"),
     getTranslations("applicationStatus"),
-    getTranslations("applicationStatusHint"),
-    getTranslations("common"),
+    getLocale(),
   ]);
   return (
     <Card
       title={t("season", { season: a.season })}
       actions={<Badge tone={APPLICATION_STATUS_TONE[a.status]}>{ts(a.status)}</Badge>}
     >
-      <form action={saveApplication} className="space-y-3">
-        <input type="hidden" name="festivalId" value={a.festivalId} />
-        <input type="hidden" name="season" value={a.season} />
-        {deadline && (
-          <p className="text-xs text-zinc-500">
-            {t("deadlineLabel")} <Deadline text={deadline} info={a.deadline} highlight={a.status === "open"} />
-          </p>
-        )}
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-          <SelectField
-            label={t("status")}
-            name="status"
-            defaultValue={a.status}
-            options={APPLICATION_STATUSES.map((s) => ({
-              value: s,
-              label: t("statusOption", { label: ts(s), hint: th(s) }),
-            }))}
-          />
-          <TextField
-            label={t("appliedOn")}
-            type="date"
-            name="appliedOn"
-            defaultValue={a.appliedOn ?? ""}
-            inputClassName="w-44"
-          />
-        </div>
-        <TextAreaField
-          label={t("note")}
-          name="note"
-          defaultValue={a.note ?? ""}
-          rows={2}
-          placeholder={t("notePlaceholder")}
-        />
-        <div className="flex items-center justify-between">
-          <SubmitButton className="btn-primary">{tc("save")}</SubmitButton>
-          <SubmitButton
-            formAction={deleteApplication}
-            confirm={t("removeConfirm", { season: a.season })}
-            className="btn-danger text-xs"
-          >
-            {t("remove")}
-          </SubmitButton>
-        </div>
-      </form>
+      <Facts
+        items={[
+          {
+            label: tf("deadline"),
+            value: deadline && <Deadline text={deadline} info={a.deadline} highlight={a.status === "open"} inline />,
+          },
+          { label: t("appliedOn"), value: a.appliedOn && formatDate(a.appliedOn, locale) },
+          { label: t("note"), value: a.note && <span className="whitespace-pre-line">{a.note}</span> },
+        ]}
+      />
     </Card>
   );
 }

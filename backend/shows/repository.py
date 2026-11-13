@@ -2,6 +2,7 @@
 
 from ..core import db
 from .models import Guest, PackingMarks, PackingStage, ScheduleItem, ScheduleTemplate, Show
+from .schemas import TemplateIn
 
 SHOW_FIELDS = [
     "date",
@@ -164,33 +165,23 @@ def find_template_by_name(name: str) -> ScheduleTemplate | None:
     return ScheduleTemplate.model_validate(row) if row else None
 
 
-def insert_template(name: str, repeatable: bool) -> None:
-    """Adds the template at the end; a name that already exists is not added a second time"""
+def save_templates(templates: list[TemplateIn]) -> None:
+    """
+    Saves all templates in one transaction, numbered in the given order (10, 20, 30 …). Templates with an ID are
+    updated, the others added; whatever is no longer in the list is deleted. The IDs must exist and the names be unique.
+    """
+    kept = [t.id for t in templates if t.id is not None]
     with db.write() as w:
-        w.execute(
-            """insert into schedule_templates (name, repeatable, sort_order)
-               values (?, ?, (select coalesce(max(sort_order), 0) + 10 from schedule_templates))
-               on conflict (name) do nothing""",
-            (name, repeatable),
-        )
-
-
-def update_template(template_id: int, name: str | None, repeatable: bool) -> None:
-    """Without a name, only `repeatable` changes"""
-    with db.write() as w:
-        w.execute(
-            "update schedule_templates set name = coalesce(?, name), repeatable = ? where id = ?",
-            (name, repeatable, template_id),
-        )
-
-
-def delete_template(template_id: int) -> None:
-    with db.write() as w:
-        w.execute("delete from schedule_templates where id = ?", (template_id,))
-
-
-def save_template_order(template_ids: list[int]) -> None:
-    """Numbers the templates in the given order (10, 20, 30 …)"""
-    with db.write() as w:
-        for index, template_id in enumerate(template_ids):
-            w.execute("update schedule_templates set sort_order = ? where id = ?", ((index + 1) * 10, template_id))
+        not_kept = f"where id not in ({', '.join('?' * len(kept))})" if kept else ""
+        w.execute(f"delete from schedule_templates {not_kept}", kept)
+        # The names are unique: kept templates first get a placeholder, so that two of them can swap their names
+        for template_id in kept:
+            w.execute("update schedule_templates set name = ? where id = ?", (f"\0{template_id}", template_id))
+        for index, t in enumerate(templates):
+            values = (t.name, t.repeatable, (index + 1) * 10)
+            if t.id is None:
+                w.execute("insert into schedule_templates (name, repeatable, sort_order) values (?, ?, ?)", values)
+            else:
+                w.execute(
+                    "update schedule_templates set name = ?, repeatable = ?, sort_order = ? where id = ?", (*values, t.id)
+                )
