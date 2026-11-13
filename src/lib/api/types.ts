@@ -18,6 +18,15 @@ export type Guest = Schemas["Guest"];
 export type ScheduleTemplate = Schemas["ScheduleTemplate"];
 export type ShowDetails = Schemas["ShowDetails"];
 export type ShowList = Schemas["ShowList"];
+export type ShowPacking = Schemas["ShowPacking"];
+
+export type PackingList = Schemas["PackingList"];
+export type PackingListCategory = Schemas["PackingListCategory"];
+export type PackingListItem = Schemas["PackingListItem"];
+export type PackingListGroup = Schemas["PackingListGroup"];
+export type PackingListSummary = Schemas["PackingListSummary"];
+export type PackingListDetails = Schemas["PackingListDetails"];
+export type PackingListSave = Schemas["PackingListSaveIn"];
 
 export type CalculatorItem = Schemas["CalculatorItem"];
 export type CalculatorInquiry = Schemas["CalculatorInquiry"];

@@ -11,6 +11,7 @@ import { addGuest, deleteGuest, deleteScheduleItem, deleteShow } from "@/feature
 import { DateBlock } from "@/features/shows/components/DateBlock";
 import { RelativeDay } from "@/features/shows/components/RelativeDay";
 import { ContactInfo, LogisticsInfo } from "@/features/shows/components/Infos";
+import { PackingListCard } from "@/features/shows/components/PackingListCard";
 import { ScheduleInput } from "@/features/shows/components/ScheduleInput";
 import { formatLongDate } from "@/lib/dates";
 import { guestCount, mapsLink, place } from "@/features/shows/infos";
@@ -29,7 +30,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
     getTranslations("showStatus"),
     getLocale(),
   ]);
-  const { show: s, schedule, guests } = data;
+  const { show: s, schedule, guests, packing } = data;
 
   const people = guestCount(guests);
   const mapUrl = mapsLink(s);
@@ -146,18 +147,22 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
           </Card>
         </div>
 
-        <Card title={t("infos")} className="h-fit space-y-4">
-          <ContactInfo show={s} />
-          <LogisticsInfo show={s} />
-          {!s.contactName && !s.fee && !s.travel && !s.hotel && !s.tech && !s.notes && (
-            <p className="text-sm text-zinc-500">
-              {t("noInfos")}{" "}
-              <Link href={`/shows/${s.id}/edit`} className="link">
-                {t("addInfos")}
-              </Link>
-            </p>
-          )}
-        </Card>
+        <div className="space-y-6">
+          <Card title={t("infos")} className="space-y-4">
+            <ContactInfo show={s} />
+            <LogisticsInfo show={s} />
+            {!s.contactName && !s.fee && !s.travel && !s.hotel && !s.tech && !s.notes && (
+              <p className="text-sm text-zinc-500">
+                {t("noInfos")}{" "}
+                <Link href={`/shows/${s.id}/edit`} className="link">
+                  {t("addInfos")}
+                </Link>
+              </p>
+            )}
+          </Card>
+
+          <PackingListCard showId={s.id} packing={packing} />
+        </div>
       </div>
 
       <ActionButton

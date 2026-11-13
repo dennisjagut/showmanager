@@ -1,7 +1,7 @@
 """Database access of the module: the SQL for shows, their schedule and guests, and the schedule templates."""
 
 from ..core import db
-from .models import Guest, ScheduleItem, ScheduleTemplate, Show
+from .models import Guest, PackingMarks, PackingStage, ScheduleItem, ScheduleTemplate, Show
 
 SHOW_FIELDS = [
     "date",
@@ -19,6 +19,7 @@ SHOW_FIELDS = [
     "travel",
     "tech",
     "notes",
+    "packing_list_id",
 ]
 
 # --- Shows -----------------------------------------------------------------------------------------------------------
@@ -47,16 +48,24 @@ def insert(values: dict[str, object]) -> int:
 
 
 def update(show_id: int, values: dict[str, object]) -> None:
+    """Marks for items that are not on the show's packing list (any more) are dropped"""
     with db.write() as w:
         w.execute(
             f"update shows set {', '.join(f'{k} = ?' for k in SHOW_FIELDS)}, updated_at = datetime('now') where id = ?",
             [*(values[k] for k in SHOW_FIELDS), show_id],
         )
+        w.execute(
+            """delete from show_packing_marks where show_id = ? and item_id not in
+               (select i.id from packing_list_items i join shows s on s.packing_list_id = i.packing_list_id
+                where s.id = ?)""",
+            (show_id, show_id),
+        )
 
 
 def delete(show_id: int) -> None:
-    """Deletes the show with its schedule and guest list"""
+    """Deletes the show with its schedule, guest list and packing marks"""
     with db.write() as w:
+        w.execute("delete from show_packing_marks where show_id = ?", (show_id,))
         w.execute("delete from show_schedule where show_id = ?", (show_id,))
         w.execute("delete from show_guests where show_id = ?", (show_id,))
         w.execute("delete from shows where id = ?", (show_id,))
@@ -110,6 +119,36 @@ def insert_guest(show_id: int, name: str, plus_ones: int, added_by: str | None, 
 def delete_guest(show_id: int, guest_id: int) -> None:
     with db.write() as w:
         w.execute("delete from show_guests where id = ? and show_id = ?", (guest_id, show_id))
+
+
+# --- Packing list ----------------------------------------------------------------------------------------------------
+
+
+def find_marks(show_id: int | None = None) -> dict[int, PackingMarks]:
+    """Checked off items per show, for one show or for all without show_id"""
+    if show_id is None:
+        rows = db.query("select * from show_packing_marks")
+    else:
+        rows = db.query("select * from show_packing_marks where show_id = ?", (show_id,))
+    marks: dict[int, PackingMarks] = {}
+    for r in rows:
+        show_marks = marks.setdefault(r["show_id"], PackingMarks())
+        (show_marks.repacked if r["stage"] == "repacked" else show_marks.packed).add(r["item_id"])
+    return marks
+
+
+def set_mark(show_id: int, item_id: int, stage: PackingStage, done: bool) -> None:
+    with db.write() as w:
+        if done:
+            w.execute(
+                "insert or ignore into show_packing_marks (show_id, item_id, stage) values (?, ?, ?)",
+                (show_id, item_id, stage),
+            )
+        else:
+            w.execute(
+                "delete from show_packing_marks where show_id = ? and item_id = ? and stage = ?",
+                (show_id, item_id, stage),
+            )
 
 
 # --- Templates for the running order ---------------------------------------------------------------------------------

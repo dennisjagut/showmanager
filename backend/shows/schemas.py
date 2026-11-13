@@ -2,8 +2,30 @@
 
 from typing import Literal
 
-from ..core.base import ApiModel, IsoDate, OptionalCount, OptionalText, RequiredText, Time
-from .models import Guest, ScheduleItem, Show, ShowStatus
+from ..core.base import ApiModel, IsoDate, OptionalCount, OptionalId, OptionalText, RequiredText, Time
+from ..masterdata.models import PackingList, PackingListCategory, PackingListItem
+from .models import Guest, PackingStage, ScheduleItem, Show, ShowStatus
+
+
+class PackingItem(ApiModel):
+    item: PackingListItem
+    # Packed for the trip to this show
+    packed: bool
+    # Packed again after this show
+    repacked: bool
+
+
+class PackingGroup(ApiModel):
+    # None for the items without a category
+    category: PackingListCategory | None
+    # In the order of the category
+    items: list[PackingItem]
+
+
+class ShowPacking(ApiModel):
+    packing_list: PackingList
+    # Items without a category first, then the categories in their order; empty categories are left out
+    groups: list[PackingGroup]
 
 
 class ShowDetails(ApiModel):
@@ -12,6 +34,8 @@ class ShowDetails(ApiModel):
     schedule: list[ScheduleItem]
     # By name
     guests: list[Guest]
+    # None if the show has no packing list
+    packing: ShowPacking | None
 
 
 class ShowRow(ApiModel):
@@ -46,6 +70,7 @@ class ShowIn(ApiModel):
     travel: OptionalText = None
     tech: OptionalText = None
     notes: OptionalText = None
+    packing_list_id: OptionalId = None
 
 
 class ScheduleItemIn(ApiModel):
@@ -58,6 +83,11 @@ class GuestIn(ApiModel):
     plus_ones: OptionalCount = None
     added_by: OptionalText = None
     note: OptionalText = None
+
+
+class PackingMarkIn(ApiModel):
+    stage: PackingStage
+    done: bool
 
 
 class TemplateIn(ApiModel):

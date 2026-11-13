@@ -158,4 +158,68 @@ CREATE TABLE `sessions` (
             """CREATE INDEX `sessions_user` ON `sessions` (`user_id`);""",
         ],
     ),
+    (
+        "0003_packing_lists",
+        [
+            """-- Packing lists in the master data, e.g. "Minimales Setup" and "Volles Setup"
+CREATE TABLE `packing_lists` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`name` text NOT NULL,
+	`created_at` text DEFAULT (datetime('now')) NOT NULL,
+	`updated_at` text DEFAULT (datetime('now')) NOT NULL
+);""",
+            """CREATE TABLE `packing_list_items` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`packing_list_id` integer NOT NULL,
+	`name` text NOT NULL,
+	`quantity` integer DEFAULT 1 NOT NULL,
+	`sort_order` integer DEFAULT 0 NOT NULL,
+	FOREIGN KEY (`packing_list_id`) REFERENCES `packing_lists`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """CREATE INDEX `packing_list_items_list` ON `packing_list_items` (`packing_list_id`);""",
+            """-- The packing list a show uses
+ALTER TABLE `shows` ADD `packing_list_id` integer REFERENCES `packing_lists`(`id`) ON DELETE set null;""",
+            """-- Items of the show's packing list that are already packed for this show
+CREATE TABLE `show_packed_items` (
+	`show_id` integer NOT NULL,
+	`item_id` integer NOT NULL,
+	PRIMARY KEY (`show_id`, `item_id`),
+	FOREIGN KEY (`show_id`) REFERENCES `shows`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`item_id`) REFERENCES `packing_list_items`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+        ],
+    ),
+    (
+        "0004_packing_list_categories",
+        [
+            """-- Sections of a packing list, e.g. Kabel, Instrumente, Drums
+CREATE TABLE `packing_list_categories` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`packing_list_id` integer NOT NULL,
+	`name` text NOT NULL,
+	`sort_order` integer DEFAULT 0 NOT NULL,
+	FOREIGN KEY (`packing_list_id`) REFERENCES `packing_lists`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """CREATE INDEX `packing_list_categories_list` ON `packing_list_categories` (`packing_list_id`);""",
+            """-- Items without a category stay at the top of the list ("Ohne Kategorie")
+ALTER TABLE `packing_list_items` ADD `category_id` integer REFERENCES `packing_list_categories`(`id`) ON DELETE set null;""",
+        ],
+    ),
+    (
+        "0005_show_packing_marks",
+        [
+            """-- Per show and item: packed for the trip there (packed) and packed again after the show (repacked)
+CREATE TABLE `show_packing_marks` (
+	`show_id` integer NOT NULL,
+	`item_id` integer NOT NULL,
+	`stage` text NOT NULL,
+	PRIMARY KEY (`show_id`, `item_id`, `stage`),
+	FOREIGN KEY (`show_id`) REFERENCES `shows`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`item_id`) REFERENCES `packing_list_items`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """INSERT INTO `show_packing_marks` (`show_id`, `item_id`, `stage`)
+SELECT `show_id`, `item_id`, 'packed' FROM `show_packed_items`;""",
+            """DROP TABLE `show_packed_items`;""",
+        ],
+    ),
 ]

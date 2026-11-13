@@ -57,6 +57,16 @@ export async function deleteGuest(formData: FormData) {
   refresh(showId);
 }
 
+// Checks an item of the show's packing list off (or not): stage "packed" before the trip, "repacked" after the show
+export async function setPackingMark(formData: FormData) {
+  const showId = idOf(formData.get("showId"));
+  await api.put(`/shows/${showId}/packing/${idOf(formData.get("itemId"))}`, {
+    stage: formData.get("stage"),
+    done: formData.get("done") === "true",
+  });
+  refresh(showId);
+}
+
 // --- Templates for the running order ---
 
 function refreshTemplates() {

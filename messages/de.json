@@ -65,7 +65,8 @@
     "applications": "Bewerbungen",
     "shows": "Shows",
     "calculator": "Kalkulator",
-    "data": "Export"
+    "data": "Export",
+    "masterdata": "Basisdaten"
   },
   "applicationStatus": {
     "open": "Offen",
@@ -326,7 +327,22 @@
     "item": "Programmpunkt",
     "itemPlaceholder": "Vorlage wählen oder frei eingeben",
     "repeatableHint": "Wird bei mehrfacher Verwendung durchnummeriert",
-    "manageTemplates": "Vorlagen verwalten"
+    "manageTemplates": "Vorlagen verwalten",
+    "packingList": "Packliste",
+    "noPackingList": "Keine Packliste ausgewählt.",
+    "choosePackingList": "Jetzt auswählen",
+    "packingListEmpty": "Die Packliste „{name}“ ist noch leer.",
+    "editPackingList": "Packliste bearbeiten",
+    "markPacked": "{name} als eingepackt markieren",
+    "markUnpacked": "{name} als nicht eingepackt markieren",
+    "packedCategory": "{packed}/{total} · {repacked}/{total}",
+    "packingProgress": "Hin {packed}/{total} · Zurück {repacked}/{total}",
+    "stagePacked": "Hin",
+    "stageRepacked": "Zurück",
+    "stagePackedHint": "Für die Fahrt zur Show eingepackt",
+    "stageRepackedHint": "Nach der Show wieder eingepackt",
+    "markRepacked": "{name} als wieder eingepackt markieren",
+    "markUnrepacked": "{name} als nicht wieder eingepackt markieren"
   },
   "showForm": {
     "show": "Show",
@@ -351,6 +367,9 @@
     "hotelPlaceholder": "Name, Adresse, Check-in, Zimmer …",
     "techPlaceholder": "Backline vor Ort, Bühnengröße, Stageplot, Ton …",
     "notesPlaceholder": "Catering, Merch, WLAN, Garderobe …",
+    "packingList": "Packliste",
+    "noPackingList": "Keine",
+    "packingListHint": "Packlisten pflegt ihr unter Basisdaten.",
     "saveChanges": "Änderungen speichern",
     "create": "Show anlegen"
   },
@@ -528,5 +547,45 @@
       "imported": "Backup geladen ✓",
       "saveError": "Das Backup konnte nicht gespeichert werden, der Browser lässt keinen Speicher zu."
     }
+  },
+  "masterdata": {
+    "title": "Basisdaten",
+    "intro": "Daten, die ihr immer wieder für Shows braucht. Einmal hier pflegen, dann bei jeder Show auswählen.",
+    "tabsLabel": "Arten von Basisdaten",
+    "tabs": {
+      "packingLists": "Packlisten"
+    }
+  },
+  "packingLists": {
+    "intro": "Was für eine Show mitmuss, z. B. „Minimales Setup“ für kleine Clubs und „Volles Setup“ für Festivals. Kategorien wie Kabel, Instrumente oder Drums gliedern die Liste. Bei jeder Show wählt ihr eine Packliste aus und hakt dort ab, was für die Fahrt eingepackt und nach der Show wieder eingepackt ist.",
+    "items": "{count, plural, =0 {Noch leer} one {# Teil} other {# Teile}}",
+    "empty": "Noch keine Packlisten.",
+    "new": "Neue Packliste",
+    "newPlaceholder": "z. B. Minimales Setup",
+    "create": "Anlegen",
+    "allLists": "← Alle Packlisten",
+    "rename": "Name der Packliste",
+    "noItems": "Noch nichts auf der Liste.",
+    "newItem": "Teil hinzufügen",
+    "newItemPlaceholder": "Teil hinzufügen, z. B. Gitarrenkabel",
+    "moveUp": "{name} nach oben",
+    "moveDown": "{name} nach unten",
+    "copy": "Als neue Packliste kopieren",
+    "copyName": "Name der Kopie",
+    "copyPlaceholder": "z. B. Volles Setup",
+    "copyHint": "Übernimmt alle Kategorien und Teile im gespeicherten Stand, z. B. um aus dem minimalen Setup das volle zu machen.",
+    "copySubmit": "Kopieren",
+    "delete": "Packliste löschen",
+    "deleteConfirm": "Packliste „{name}“ löschen? Shows, die sie verwenden, haben danach keine Packliste mehr.",
+    "quantityOf": "Anzahl {name}",
+    "uncategorized": "Ohne Kategorie",
+    "categoryName": "Name der Kategorie",
+    "deleteCategory": "Kategorie {name} löschen",
+    "categoryDeleteConfirm": "Kategorie „{name}“ mit {count, plural, one {# Teil} other {# Teilen}} löschen? Endgültig weg ist sie erst nach dem Speichern.",
+    "newCategory": "Neue Kategorie",
+    "newCategoryPlaceholder": "z. B. Kabel, Instrumente, Drums",
+    "addCategory": "Kategorie anlegen",
+    "unsaved": "Ungespeicherte Änderungen",
+    "saveError": "Nicht gespeichert. Bitte die Eingaben prüfen und nochmal versuchen."
   }
 }

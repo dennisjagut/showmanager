@@ -9,6 +9,7 @@ export const MODULES = [
   },
   { id: "shows", href: "/shows", icon: "🎤", isActive: (p: string) => p.startsWith("/shows") },
   { id: "calculator", href: "/calculator", icon: "🧮", isActive: (p: string) => p.startsWith("/calculator") },
+  { id: "masterdata", href: "/masterdata", icon: "🗂️", isActive: (p: string) => p.startsWith("/masterdata") },
   { id: "data", href: "/data", icon: "💾", isActive: (p: string) => p.startsWith("/data") },
 ] as const;
 

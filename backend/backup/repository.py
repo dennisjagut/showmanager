@@ -9,6 +9,10 @@ TABLES = [
     "show_schedule",
     "show_guests",
     "schedule_templates",
+    "show_packing_marks",
+    "packing_lists",
+    "packing_list_categories",
+    "packing_list_items",
     "calculator_items",
     "calculator_inquiry",
 ]
