@@ -222,4 +222,70 @@ SELECT `show_id`, `item_id`, 'packed' FROM `show_packed_items`;""",
             """DROP TABLE `show_packed_items`;""",
         ],
     ),
+    (
+        "0006_festival_fixed_fields",
+        [
+            """-- Festival month, deadline and federal state were free text. From now on the month is a number (1 = January),
+-- the deadline an ISO date that repeats every year and the state one of the 16 codes. Text that does not fit is kept
+-- in the notes, so nothing gets lost.
+CREATE TABLE `_month_names` (`number` integer NOT NULL, `name` text NOT NULL);""",
+            """INSERT INTO `_month_names` (`number`, `name`) VALUES
+	(1, 'januar'), (2, 'februar'), (3, 'märz'), (3, 'maerz'), (4, 'april'), (5, 'mai'), (6, 'juni'), (7, 'juli'),
+	(8, 'august'), (9, 'september'), (10, 'oktober'), (11, 'november'), (12, 'dezember');""",
+            """CREATE TABLE `_state_names` (`code` text NOT NULL, `name` text NOT NULL);""",
+            """INSERT INTO `_state_names` (`code`, `name`) VALUES
+	('BW', 'baden-württemberg'), ('BW', 'baden-wuerttemberg'), ('BY', 'bayern'), ('BE', 'berlin'),
+	('BB', 'brandenburg'), ('HB', 'bremen'), ('HH', 'hamburg'), ('HE', 'hessen'), ('MV', 'mecklenburg-vorpommern'),
+	('NI', 'niedersachsen'), ('NW', 'nordrhein-westfalen'), ('NW', 'nrw'), ('RP', 'rheinland-pfalz'),
+	('SL', 'saarland'), ('SN', 'sachsen'), ('ST', 'sachsen-anhalt'), ('SH', 'schleswig-holstein'),
+	('TH', 'thüringen'), ('TH', 'thueringen');""",
+            """ALTER TABLE `festivals` ADD `month_number` integer;""",
+            """ALTER TABLE `festivals` ADD `deadline_month` integer;""",
+            """ALTER TABLE `festivals` ADD `deadline_date` text;""",
+            """ALTER TABLE `festivals` ADD `state_code` text;""",
+            """-- The first month named in the text, as the app read it so far ("Juli/August" → July)
+UPDATE `festivals` SET
+	`month_number` = (SELECT `number` FROM `_month_names` WHERE lower(`month`) LIKE '%' || `name` || '%'
+		ORDER BY `number` LIMIT 1),
+	`deadline_month` = (SELECT `number` FROM `_month_names` WHERE lower(`deadline`) LIKE '%' || `name` || '%'
+		ORDER BY `number` LIMIT 1),
+	`state_code` = coalesce(
+		(SELECT `code` FROM `_state_names` WHERE `code` = upper(trim(`state`)) LIMIT 1),
+		(SELECT `code` FROM `_state_names` WHERE `name` = lower(trim(`state`)) LIMIT 1));""",
+            """-- "ab Juni" ("from June") names the start of the application period, not its end
+UPDATE `festivals` SET `deadline_month` = NULL WHERE lower(trim(`deadline`)) LIKE 'ab %';""",
+            """-- The last day of the month: "Oktober" and "bis Oktober" → 31 October, "vor Oktober" → 30 September.
+-- The year is the one of the current season; a deadline after the festival month belongs to the year before.
+UPDATE `festivals` SET `deadline_date` = (
+	SELECT date(printf('%04d-%02d-01', iif(m.target = 0, m.year - 1, m.year), iif(m.target = 0, 12, m.target)),
+		'+1 month', '-1 day')
+	FROM (
+		SELECT
+			`deadline_month` - iif(lower(trim(`deadline`)) LIKE 'vor %', 1, 0) AS target,
+			cast(strftime('%Y', 'now') AS integer) + iif(cast(strftime('%m', 'now') AS integer) >= 9, 1, 0)
+				- iif(`deadline_month` <= coalesce(`month_number`, 8), 0, 1) AS year
+	) m
+) WHERE `deadline_month` IS NOT NULL;""",
+            """-- Keep the old text in the notes where the new field cannot hold all of it
+UPDATE `festivals` SET `notes` = coalesce(`notes` || char(10), '') || 'Festivalmonat bisher: ' || `month`
+WHERE `month` IS NOT NULL AND (`month_number` IS NULL OR lower(trim(`month`)) NOT IN (
+	SELECT `name` FROM `_month_names` WHERE `number` = `month_number`));""",
+            """UPDATE `festivals` SET `notes` = coalesce(`notes` || char(10), '') || 'Deadline bisher: ' || `deadline`
+WHERE `deadline` IS NOT NULL AND (`deadline_date` IS NULL OR lower(trim(`deadline`)) NOT IN (
+	SELECT `name` FROM `_month_names` WHERE `number` = `deadline_month`
+	UNION SELECT 'vor ' || `name` FROM `_month_names` WHERE `number` = `deadline_month`
+	UNION SELECT 'bis ' || `name` FROM `_month_names` WHERE `number` = `deadline_month`));""",
+            """UPDATE `festivals` SET `notes` = coalesce(`notes` || char(10), '') || 'Bundesland bisher: ' || `state`
+WHERE `state` IS NOT NULL AND `state_code` IS NULL;""",
+            """ALTER TABLE `festivals` DROP COLUMN `month`;""",
+            """ALTER TABLE `festivals` DROP COLUMN `deadline`;""",
+            """ALTER TABLE `festivals` DROP COLUMN `state`;""",
+            """ALTER TABLE `festivals` DROP COLUMN `deadline_month`;""",
+            """ALTER TABLE `festivals` RENAME COLUMN `month_number` TO `month`;""",
+            """ALTER TABLE `festivals` RENAME COLUMN `deadline_date` TO `deadline`;""",
+            """ALTER TABLE `festivals` RENAME COLUMN `state_code` TO `state`;""",
+            """DROP TABLE `_month_names`;""",
+            """DROP TABLE `_state_names`;""",
+        ],
+    ),
 ]

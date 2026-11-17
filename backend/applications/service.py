@@ -2,7 +2,7 @@
 
 from ..core.dates import current_season, today_iso
 from . import repository
-from .deadline import DEADLINE_SOON_DAYS, deadline_for_season, month_index
+from .deadline import DEADLINE_SOON_DAYS, deadline_for_season
 from .models import STATUSES, Application, Festival
 from .schemas import (
     ApplicationWithDeadline,
@@ -77,7 +77,7 @@ def _matches(row: OverviewRow, filters: OverviewFilters) -> bool:
         return False
     if filters.state and f.state != filters.state:
         return False
-    if filters.month and f.month != filters.month:
+    if filters.month and str(f.month) != filters.month:
         return False
     if filters.deadline == "known" and not row.deadline:
         return False
@@ -96,7 +96,7 @@ def _sorted(rows: list[OverviewRow], sort: str) -> list[OverviewRow]:
     if sort == "deadline":
         rows.sort(key=lambda r: r.deadline.date if r.deadline else "9999")
     elif sort == "month":
-        rows.sort(key=lambda r: 99 if (m := month_index(r.festival.month)) is None else m)
+        rows.sort(key=lambda r: r.festival.month or 99)
     elif sort == "status":
         rows.sort(key=lambda r: STATUSES.index(r.status))
     elif sort == "applied":
@@ -120,14 +120,8 @@ def _with_deadline(application: Application, festival: Festival) -> ApplicationW
     return ApplicationWithDeadline(**application.model_dump(), deadline=deadline)
 
 
-def _festival_values(body: FestivalIn) -> dict[str, object]:
-    values = body.model_dump()
-    values["state"] = values["state"].upper() if values["state"] else None
-    return values
-
-
 def create_festival(body: FestivalIn) -> int:
-    return repository.insert(_festival_values(body))
+    return repository.insert(body.model_dump())
 
 
 def save_festival(festival_id: int, body: FestivalSaveIn) -> FestivalDetails | None:
@@ -141,7 +135,7 @@ def save_festival(festival_id: int, body: FestivalSaveIn) -> FestivalDetails | N
         a.model_copy(update={"applied_on": today_iso()}) if a.status == "applied" and not a.applied_on else a
         for a in body.applications
     ]
-    repository.save_with_applications(festival_id, _festival_values(body), applications)
+    repository.save_with_applications(festival_id, body.model_dump(), applications)
     return festival_details(festival_id)
 
 

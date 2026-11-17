@@ -2,20 +2,21 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field, model_validator
+from pydantic import BeforeValidator, Field, model_validator
 
-from ..core.base import ApiModel, OptionalIsoDate, OptionalText, RequiredText
-from .models import Application, ApplicationStatus, Festival
+from ..core.base import ApiModel, OptionalIsoDate, OptionalMonth, OptionalText, RequiredText, empty_to_none
+from .models import Application, ApplicationStatus, Festival, State
 
 DeadlineState = Literal["passed", "soon", "later"]
 
+# Federal state from a select field; empty becomes None
+OptionalState = Annotated[State | None, BeforeValidator(empty_to_none)]
+
 
 class Deadline(ApiModel):
-    """Approximate deadline for one season, derived from the free text"""
+    """Deadline of the festival in one season"""
 
     date: str
-    # True for "Januar?" and the like
-    uncertain: bool
     state: DeadlineState
 
 
@@ -44,7 +45,7 @@ class OverviewRow(FestivalRow):
 class Overview(ApiModel):
     season: int
     seasons: Seasons
-    states: list[str]
+    states: list[State]
     soon_days: int
     # Counters only leave out inactive festivals and ignore search and filters, so the state of the season stays visible
     festivals: int
@@ -80,10 +81,10 @@ class FestivalDetails(ApiModel):
 class FestivalIn(ApiModel):
     name: RequiredText
     location: OptionalText = None
-    state: OptionalText = None
-    month: OptionalText = None
+    state: OptionalState = None
+    month: OptionalMonth = None
     website: OptionalText = None
-    deadline: OptionalText = None
+    deadline: OptionalIsoDate = None
     contact: OptionalText = None
     notes: OptionalText = None
     active: bool = True

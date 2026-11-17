@@ -13,7 +13,7 @@ import { FestivalEditor } from "@/features/applications/components/FestivalEdito
 import { getFestival } from "@/features/applications/api";
 import { APPLICATION_STATUS_TONE } from "@/features/applications/status";
 import type { ApplicationWithDeadline } from "@/lib/api/types";
-import { formatDate } from "@/lib/dates";
+import { formatDate, formatDayMonth, monthName } from "@/lib/dates";
 import { type SearchParams, param } from "@/lib/search-params";
 
 export const dynamic = "force-dynamic";
@@ -27,12 +27,14 @@ type Props = {
 export default async function FestivalPage({ params, searchParams }: Props) {
   const { id } = await params;
   const sp = await searchParams;
-  const [data, t, tf, tc, ts] = await Promise.all([
+  const [data, t, tf, tc, ts, tStates, locale] = await Promise.all([
     getFestival(id),
     getTranslations("festival"),
     getTranslations("festivalForm"),
     getTranslations("common"),
     getTranslations("applicationStatus"),
+    getTranslations("states"),
+    getLocale(),
   ]);
   const { festival: f, applications, seasons } = data;
 
@@ -52,7 +54,7 @@ export default async function FestivalPage({ params, searchParams }: Props) {
   }
 
   const facts: Fact[] = [
-    { label: tf("deadline"), value: f.deadline },
+    { label: tf("deadline"), value: f.deadline && tf("deadlineYearly", { date: formatDayMonth(f.deadline, locale) }) },
     { label: tf("contact"), value: f.contact && <Contact text={f.contact} /> },
     { label: tf("website"), value: f.website && <WebsiteLink url={f.website} /> },
     { label: tf("notes"), value: f.notes && <span className="whitespace-pre-line">{f.notes}</span> },
@@ -68,7 +70,7 @@ export default async function FestivalPage({ params, searchParams }: Props) {
             {!f.active && <span className="ml-2 align-middle text-sm font-normal text-rose-600">{t("inactive")}</span>}
           </>
         }
-        description={[f.location, f.state, f.month].filter(Boolean).join(" · ")}
+        description={[f.location, f.state && tStates(f.state), monthName(f.month, locale)].filter(Boolean).join(" · ")}
         actions={
           <>
             {param(sp, "saved") && <Notice>{tc("saved")}</Notice>}
@@ -83,7 +85,7 @@ export default async function FestivalPage({ params, searchParams }: Props) {
         <section className="space-y-3">
           <h2 className="section-title">{t("applications")}</h2>
           {applications.map((a) => (
-            <ApplicationCard key={a.id} application={a} deadline={f.deadline} />
+            <ApplicationCard key={a.id} application={a} />
           ))}
           {applications.length === 0 && (
             <p className="text-sm text-zinc-500">{t("noApplications", { status: ts("open") })}</p>
@@ -114,14 +116,7 @@ export default async function FestivalPage({ params, searchParams }: Props) {
   );
 }
 
-async function ApplicationCard({
-  application: a,
-  deadline,
-}: {
-  application: ApplicationWithDeadline;
-  // free text of the festival
-  deadline: string | null;
-}) {
+async function ApplicationCard({ application: a }: { application: ApplicationWithDeadline }) {
   const [t, tf, ts, locale] = await Promise.all([
     getTranslations("festival"),
     getTranslations("festivalForm"),
@@ -137,7 +132,7 @@ async function ApplicationCard({
         items={[
           {
             label: tf("deadline"),
-            value: deadline && <Deadline text={deadline} info={a.deadline} highlight={a.status === "open"} inline />,
+            value: a.deadline && <Deadline info={a.deadline} highlight={a.status === "open"} />,
           },
           { label: t("appliedOn"), value: a.appliedOn && formatDate(a.appliedOn, locale) },
           { label: t("note"), value: a.note && <span className="whitespace-pre-line">{a.note}</span> },

@@ -140,7 +140,6 @@
     "reset": "Filter zurücksetzen"
   },
   "deadline": {
-    "approximate": "Aus dem Freitext abgeleitetes, ungefähres Datum",
     "passed": "vorbei",
     "soon": "bald"
   },
@@ -172,13 +171,33 @@
     "state": "Bundesland",
     "month": "Festivalmonat",
     "deadline": "Deadline Bewerbung",
-    "deadlinePlaceholder": "z. B. vor Oktober",
+    "deadlineHint": "Gilt jedes Jahr am selben Tag.",
+    "deadlineYearly": "jedes Jahr am {date}",
+    "none": "–",
     "website": "Website",
     "contact": "Kontakt",
     "contactPlaceholder": "E-Mail, Formular-Link, Ansprechpartner …",
     "notes": "Hinweise",
     "active": "Festival existiert noch (aktiv)",
     "create": "Festival anlegen"
+  },
+  "states": {
+    "BW": "Baden-Württemberg",
+    "BY": "Bayern",
+    "BE": "Berlin",
+    "BB": "Brandenburg",
+    "HB": "Bremen",
+    "HH": "Hamburg",
+    "HE": "Hessen",
+    "MV": "Mecklenburg-Vorpommern",
+    "NI": "Niedersachsen",
+    "NW": "Nordrhein-Westfalen",
+    "RP": "Rheinland-Pfalz",
+    "SL": "Saarland",
+    "SN": "Sachsen",
+    "ST": "Sachsen-Anhalt",
+    "SH": "Schleswig-Holstein",
+    "TH": "Thüringen"
   },
   "data": {
     "title": "Export",

@@ -9,7 +9,7 @@ import { FilterBar } from "@/features/applications/components/FilterBar";
 import { StatusSelect } from "@/features/applications/components/StatusSelect";
 import { getOverview } from "@/features/applications/api";
 import { APPLICATION_STATUSES, APPLICATION_STATUS_TONE, isApplicationStatus } from "@/features/applications/status";
-import { formatDate } from "@/lib/dates";
+import { formatDate, monthName } from "@/lib/dates";
 import { linkWith, param, type SearchParams } from "@/lib/search-params";
 
 export const dynamic = "force-dynamic";
@@ -107,9 +107,11 @@ export default async function Overview({ searchParams }: { searchParams: Promise
                   )}
                   {f.notes && <div className="mt-1 text-xs text-zinc-500 italic">{f.notes}</div>}
                 </td>
-                <td className="px-3 py-2.5">{f.month ?? <span className="text-zinc-400">–</span>}</td>
+                <td className="px-3 py-2.5">
+                  {monthName(f.month, locale) || <span className="text-zinc-400">–</span>}
+                </td>
                 <td className="px-3 py-2.5 text-xs">
-                  <Deadline text={f.deadline} info={deadline} highlight={status === "open"} />
+                  <Deadline info={deadline} highlight={status === "open"} />
                 </td>
                 <td className="px-3 py-2.5 text-xs">
                   <Contact text={f.contact} />
@@ -139,17 +141,17 @@ export default async function Overview({ searchParams }: { searchParams: Promise
                   {f.name}
                 </Link>
                 <div className="text-xs text-zinc-500">
-                  {[f.location, f.state, f.month].filter(Boolean).join(" · ")}
+                  {[f.location, f.state, monthName(f.month, locale)].filter(Boolean).join(" · ")}
                 </div>
               </div>
               <div className="w-40 shrink-0">
                 <StatusSelect festivalId={f.id} season={season} status={status} festivalName={f.name} />
               </div>
             </div>
-            {f.deadline && (
+            {deadline && (
               <div className="text-xs">
                 <span className="text-zinc-500">{t("deadlineLabel")} </span>
-                <Deadline text={f.deadline} info={deadline} highlight={status === "open"} inline />
+                <Deadline info={deadline} highlight={status === "open"} />
               </div>
             )}
             {f.contact && (

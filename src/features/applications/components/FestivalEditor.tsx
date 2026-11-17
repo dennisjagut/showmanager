@@ -1,19 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Facts } from "@/components/ui/Facts";
-import { Checkbox, DataList, SelectField, TextAreaField, TextField } from "@/components/ui/Field";
+import { Checkbox, SelectField, TextAreaField, TextField } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { SaveBar } from "@/components/ui/SaveBar";
 import { useDraft } from "@/components/ui/use-draft";
 import { saveFestival } from "@/features/applications/actions";
 import { Deadline } from "@/features/applications/components/Deadline";
 import {
-  STATES,
   applicationKey,
   countChanges,
   draftFrom,
@@ -24,10 +23,10 @@ import {
   type ApplicationDraft,
   type FestivalField,
 } from "@/features/applications/festival-draft";
+import { useFestivalOptions } from "@/features/applications/options";
 import { APPLICATION_STATUSES } from "@/features/applications/status";
 import type { FestivalDetails } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
-import { monthNames } from "@/lib/dates";
 
 /**
  * Edit mode of a festival: master data and the applications of all seasons in one draft, saved with one button.
@@ -48,7 +47,7 @@ export function FestivalEditor({
   const ts = useTranslations("applicationStatus");
   const th = useTranslations("applicationStatusHint");
   const tc = useTranslations("common");
-  const locale = useLocale();
+  const options = useFestivalOptions();
   const router = useRouter();
   const festivalId = details.festival.id;
   const deadlines = new Map(details.applications.map((a) => [a.season, a.deadline]));
@@ -76,11 +75,17 @@ export function FestivalEditor({
     return {
       name,
       value: draft.fields[name],
-      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
         update({ ...draft, fields: { ...draft.fields, [name]: e.target.value } }),
       changed: isFieldChanged(draft, saved, name),
       error: errors[name],
     };
+  }
+
+  // A select field of the festival, with an empty option for "not known"
+  function select(name: FestivalField, choices: { value: string | number; label: string }[]) {
+    const { value, onChange, changed } = field(name);
+    return { name, value, onChange, changed, options: [{ value: "", label: tf("none") }, ...choices] };
   }
 
   function changeApplication(key: string, changes: Partial<ApplicationDraft>) {
@@ -163,8 +168,8 @@ export function FestivalEditor({
                   items={[
                     {
                       label: tf("deadline"),
-                      value: draft.fields.deadline && (
-                        <Deadline text={draft.fields.deadline} info={deadline} highlight={a.status === "open"} inline />
+                      value: draft.fields.deadline && deadline && (
+                        <Deadline info={deadline} highlight={a.status === "open"} />
                       ),
                     },
                   ]}
@@ -223,13 +228,13 @@ export function FestivalEditor({
           <h2 className="section-title">{t("masterData")}</h2>
           <Card className="space-y-4">
             <TextField label={tf("name")} required autoComplete="off" {...field("name")} />
-            <div className="grid grid-cols-[1fr_7rem] gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <TextField label={tf("location")} placeholder={tf("locationPlaceholder")} {...field("location")} />
-              <TextField label={tf("state")} list="states" maxLength={20} {...field("state")} />
+              <SelectField label={tf("state")} {...select("state", options.states)} />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <TextField label={tf("month")} list="months" {...field("month")} />
-              <TextField label={tf("deadline")} placeholder={tf("deadlinePlaceholder")} {...field("deadline")} />
+              <SelectField label={tf("month")} {...select("month", options.months)} />
+              <TextField label={tf("deadline")} type="date" hint={tf("deadlineHint")} {...field("deadline")} />
             </div>
             <TextField label={tf("website")} type="url" placeholder="https://" {...field("website")} />
             <TextField label={tf("contact")} placeholder={tf("contactPlaceholder")} {...field("contact")} />
@@ -240,8 +245,6 @@ export function FestivalEditor({
               onChange={(e) => update({ ...draft, active: e.target.checked })}
               className={cn("pointer-coarse:min-h-11", draft.active !== saved.active && "font-medium")}
             />
-            <DataList id="states" values={STATES} />
-            <DataList id="months" values={monthNames(locale)} />
           </Card>
         </section>
       </fieldset>
