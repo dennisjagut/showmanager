@@ -1,5 +1,7 @@
 """Business logic of the module. The router calls only this, this calls the repository."""
 
+from ..contacts import service as contacts
+from ..contacts.schemas import ContactDetails
 from ..core.dates import current_season, today_iso
 from . import repository
 from .deadline import DEADLINE_SOON_DAYS, deadline_for_season, month_index
@@ -33,20 +35,35 @@ def seasons() -> Seasons:
     return Seasons(current=current, all=sorted(repository.find_seasons() | {current, current + 1}, reverse=True))
 
 
+def _contacts_by_festival() -> dict[int, list[ContactDetails]]:
+    """The linked contacts of all festivals, in their order"""
+    links = repository.find_contact_links()
+    if not links:
+        return {}
+    details = {d.contact.id: d for d in contacts.all_details()}
+    return {festival_id: [details[i] for i in ids if i in details] for festival_id, ids in links.items()}
+
+
 def festival_list(season: str) -> FestivalList:
     """All festivals with their application in one season (default: the current one)"""
     number = parse_season(season) or current_season()
-    rows = [FestivalRow(festival=f, application=a) for f, a in repository.find_all_with_application(number)]
+    linked = _contacts_by_festival()
+    rows = [
+        FestivalRow(festival=f, application=a, contacts=[d.contact for d in linked.get(f.id, [])])
+        for f, a in repository.find_all_with_application(number)
+    ]
     return FestivalList(season=number, rows=rows)
 
 
 def overview(season: str, filters: OverviewFilters) -> Overview:
     """The applications overview. Unknown filter values are ignored, they can only come from an edited address."""
     number = parse_season(season) or current_season()
+    linked = _contacts_by_festival()
     visible = [
         OverviewRow(
             festival=f,
             application=a,
+            contacts=[d.contact for d in linked.get(f.id, [])],
             status=a.status if a else "open",
             deadline=deadline_for_season(f.deadline, f.month, number),
         )
@@ -85,7 +102,8 @@ def _matches(row: OverviewRow, filters: OverviewFilters) -> bool:
         return False
     search = filters.q.strip().lower()
     if search:
-        text = " ".join(x or "" for x in [f.name, f.location, f.contact, f.notes, a.note if a else None])
+        contact_texts = [x for c in row.contacts for x in (c.name, c.email, c.phone, c.notes)]
+        text = " ".join(x or "" for x in [f.name, f.location, *contact_texts, f.notes, a.note if a else None])
         if search not in text.lower():
             return False
     return True
@@ -112,6 +130,7 @@ def festival_details(festival_id: int) -> FestivalDetails | None:
         festival=festival,
         applications=[_with_deadline(a, festival) for a in repository.find_applications(festival_id)],
         seasons=seasons(),
+        contacts=_contacts_by_festival().get(festival_id, []),
     )
 
 
@@ -126,13 +145,20 @@ def _festival_values(body: FestivalIn) -> dict[str, object]:
     return values
 
 
+def _known_contacts(ids: list[int]) -> list[int]:
+    """Contacts that do not exist (any more) are left out, a contact listed twice only counts once"""
+    existing = {d.contact.id for d in contacts.all_details()} if ids else set()
+    return [i for n, i in enumerate(ids) if i in existing and i not in ids[:n]]
+
+
 def create_festival(body: FestivalIn) -> int:
-    return repository.insert(_festival_values(body))
+    return repository.insert(_festival_values(body), _known_contacts(body.contacts))
 
 
 def save_festival(festival_id: int, body: FestivalSaveIn) -> FestivalDetails | None:
     """
-    Saves the festival with all its applications and returns it as saved; seasons that are missing are deleted.
+    Saves the festival with all its applications and contacts and returns it as saved; seasons that are missing are
+    deleted.
     "applied" without a date gets today. None if the festival does not exist.
     """
     if not repository.find_by_id(festival_id):
@@ -141,7 +167,9 @@ def save_festival(festival_id: int, body: FestivalSaveIn) -> FestivalDetails | N
         a.model_copy(update={"applied_on": today_iso()}) if a.status == "applied" and not a.applied_on else a
         for a in body.applications
     ]
-    repository.save_with_applications(festival_id, _festival_values(body), applications)
+    repository.save_with_applications(
+        festival_id, _festival_values(body), applications, _known_contacts(body.contacts)
+    )
     return festival_details(festival_id)
 
 

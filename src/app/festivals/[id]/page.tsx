@@ -7,7 +7,9 @@ import { Facts, type Fact } from "@/components/ui/Facts";
 import { Notice } from "@/components/ui/Notice";
 import { Page, PageHeader } from "@/components/ui/Page";
 import { deleteFestival } from "@/features/applications/actions";
-import { Contact, WebsiteLink } from "@/features/applications/components/Contact";
+import { WebsiteLink } from "@/features/applications/components/WebsiteLink";
+import { getContacts } from "@/features/contacts/api";
+import { LinkedContacts } from "@/features/contacts/components/ContactChannels";
 import { Deadline } from "@/features/applications/components/Deadline";
 import { FestivalEditor } from "@/features/applications/components/FestivalEditor";
 import { getFestival } from "@/features/applications/api";
@@ -42,18 +44,22 @@ export default async function FestivalPage({ params, searchParams }: Props) {
   const readHref = `/festivals/${f.id}?season=${season}`;
 
   if (param(sp, "bearbeiten") === "1") {
+    const contactList = await getContacts();
     return (
       <Page>
         <PageHeader title={t("editTitle", { name: f.name })} />
         {/* A new key for another festival, so the editor does not keep the draft of the previous one */}
-        <FestivalEditor key={f.id} details={data} season={season} readHref={readHref} />
+        <FestivalEditor key={f.id} details={data} season={season} readHref={readHref} allContacts={contactList.rows} />
       </Page>
     );
   }
 
   const facts: Fact[] = [
     { label: tf("deadline"), value: f.deadline },
-    { label: tf("contact"), value: f.contact && <Contact text={f.contact} /> },
+    {
+      label: tf("contacts"),
+      value: data.contacts.length > 0 && <LinkedContacts contacts={data.contacts.map((c) => c.contact)} />,
+    },
     { label: tf("website"), value: f.website && <WebsiteLink url={f.website} /> },
     { label: tf("notes"), value: f.notes && <span className="whitespace-pre-line">{f.notes}</span> },
   ];

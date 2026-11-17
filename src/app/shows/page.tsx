@@ -53,7 +53,7 @@ export default async function ShowOverview({ searchParams }: { searchParams: Pro
           <div className="min-w-0">
             <div className="truncate text-lg font-semibold">{next.show.title}</div>
             <div className="truncate text-sm opacity-90">
-              {[next.show.venue, next.show.address].filter(Boolean).join(" · ")}
+              {[next.venue?.name, next.venue?.location].filter(Boolean).join(" · ")}
             </div>
             <div className="mt-1 text-sm opacity-90">
               {next.showtime ? `${t("showtime", { time: next.showtime })} · ` : ""}
@@ -86,7 +86,7 @@ export default async function ShowOverview({ searchParams }: { searchParams: Pro
       </div>
 
       <ul className="space-y-2">
-        {visible.map(({ show: s, showtime, guestCount }) => (
+        {visible.map(({ show: s, venue, showtime, guestCount }) => (
           <li key={s.id}>
             <Link
               href={`/shows/${s.id}`}
@@ -100,7 +100,7 @@ export default async function ShowOverview({ searchParams }: { searchParams: Pro
                   {s.tour && <span className="text-xs text-zinc-500">{s.tour}</span>}
                 </div>
                 <div className="truncate text-sm text-zinc-500">
-                  {[s.venue, s.address].filter(Boolean).join(" · ") || t("venueOpen")}
+                  {[venue?.name, venue?.location].filter(Boolean).join(" · ") || t("venueOpen")}
                 </div>
               </div>
               <div className="hidden shrink-0 text-right text-xs text-zinc-500 sm:block">

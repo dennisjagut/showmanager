@@ -5,6 +5,8 @@ from typing import Annotated, Literal
 from pydantic import Field, model_validator
 
 from ..core.base import ApiModel, OptionalIsoDate, OptionalText, RequiredText
+from ..contacts.models import Contact
+from ..contacts.schemas import ContactDetails
 from .models import Application, ApplicationStatus, Festival
 
 DeadlineState = Literal["passed", "soon", "later"]
@@ -29,6 +31,8 @@ class Seasons(ApiModel):
 class FestivalRow(ApiModel):
     festival: Festival
     application: Application | None
+    # From the contact list, in their order
+    contacts: list[Contact]
 
 
 class FestivalList(ApiModel):
@@ -75,6 +79,8 @@ class FestivalDetails(ApiModel):
     # Newest season first
     applications: list[ApplicationWithDeadline]
     seasons: Seasons
+    # From the contact list, in their order
+    contacts: list[ContactDetails]
 
 
 class FestivalIn(ApiModel):
@@ -84,9 +90,10 @@ class FestivalIn(ApiModel):
     month: OptionalText = None
     website: OptionalText = None
     deadline: OptionalText = None
-    contact: OptionalText = None
     notes: OptionalText = None
     active: bool = True
+    # IDs from the contact list, in this order; unknown ones are left out
+    contacts: list[int] = Field(default=[], max_length=50)
 
 
 class ApplicationIn(ApiModel):

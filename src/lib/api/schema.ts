@@ -341,6 +341,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/shows/{show_id}/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Contacts
+         * @description Links promoters and people to talk to from the contact list; contacts that are missing are unlinked
+         */
+        put: operations["set_contacts_api_v1_shows__show_id__contacts_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contact_id}/shows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Shows Of Contact
+         * @description Shows a contact is linked to, newest first, each once with all its roles there
+         */
+        get: operations["shows_of_contact_api_v1_contacts__contact_id__shows_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/shows/{show_id}/packing-list": {
         parameters: {
             query?: never;
@@ -397,6 +437,72 @@ export interface paths {
         put: operations["save_templates_api_v1_templates_put"];
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Contact List
+         * @description All contacts with roles and links. Filters are the URL parameters of the page, unknown values are ignored.
+         */
+        get: operations["contact_list_api_v1_contacts_get"];
+        put?: never;
+        /** Create Contact */
+        post: operations["create_contact_api_v1_contacts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Contact Options
+         * @description Contacts to choose from in a form, e.g. all organizations, or only the venues
+         */
+        get: operations["contact_options_api_v1_contacts_options_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contact_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contact Details */
+        get: operations["contact_details_api_v1_contacts__contact_id__get"];
+        /**
+         * Save Contact
+         * @description Saves fields, roles and links: links that are missing are removed, those without contact ID create a contact
+         */
+        put: operations["save_contact_api_v1_contacts__contact_id__put"];
+        post?: never;
+        /**
+         * Delete Contact
+         * @description The linked contacts stay, only the links to them are removed
+         */
+        delete: operations["delete_contact_api_v1_contacts__contact_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -826,6 +932,167 @@ export interface components {
             /** Duration */
             duration: number | null;
         };
+        /** Contact */
+        Contact: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "person" | "organization";
+            /** Name */
+            name: string;
+            /** Email */
+            email: string | null;
+            /** Phone */
+            phone: string | null;
+            /** Website */
+            website: string | null;
+            /** Street */
+            street: string | null;
+            /** Location */
+            location: string | null;
+            /** Notes */
+            notes: string | null;
+            /** Createdat */
+            createdAt: string;
+            /** Updatedat */
+            updatedAt: string;
+        };
+        /** ContactDetails */
+        ContactDetails: {
+            contact: components["schemas"]["Contact"];
+            /** Roles */
+            roles: ("promoter" | "venue" | "festival" | "band" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+            /** Links */
+            links: components["schemas"]["ContactLink"][];
+        };
+        /**
+         * ContactIn
+         * @description A new contact. The kind cannot be changed afterwards.
+         */
+        ContactIn: {
+            /** Name */
+            name: string;
+            /** Email */
+            email?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Website */
+            website?: string | null;
+            /** Street */
+            street?: string | null;
+            /** Location */
+            location?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Roles
+             * @default []
+             */
+            roles: ("promoter" | "venue" | "festival" | "band" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+            /**
+             * Links
+             * @default []
+             */
+            links: components["schemas"]["ContactLinkIn"][];
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "person" | "organization";
+        };
+        /**
+         * ContactLink
+         * @description An affiliation seen from one side: the organization of a person, or a person of an organization
+         */
+        ContactLink: {
+            contact: components["schemas"]["ContactRef"];
+            /** Position */
+            position: string | null;
+        };
+        /**
+         * ContactLinkIn
+         * @description A link to a contact of the other kind: an existing one by ID, or a new one by name
+         */
+        ContactLinkIn: {
+            /** Contactid */
+            contactId?: number | null;
+            /** Name */
+            name?: string | null;
+            /** Position */
+            position?: string | null;
+        };
+        /** ContactList */
+        ContactList: {
+            /** Kinds */
+            kinds: {
+                [key: string]: number;
+            };
+            /** Roles */
+            roles: {
+                [key: string]: number;
+            };
+            /** Rows */
+            rows: components["schemas"]["ContactDetails"][];
+        };
+        /**
+         * ContactRef
+         * @description Short form of a contact, for links and for choosing one in a form
+         */
+        ContactRef: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "person" | "organization";
+            /** Name */
+            name: string;
+            /** Roles */
+            roles: ("promoter" | "venue" | "festival" | "band" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+        };
+        /**
+         * ContactSaveIn
+         * @description The contact as it should be afterwards: links that are missing are removed, the linked contacts stay
+         */
+        ContactSaveIn: {
+            /** Name */
+            name: string;
+            /** Email */
+            email?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Website */
+            website?: string | null;
+            /** Street */
+            street?: string | null;
+            /** Location */
+            location?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Roles
+             * @default []
+             */
+            roles: ("promoter" | "venue" | "festival" | "band" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+            /**
+             * Links
+             * @default []
+             */
+            links: components["schemas"]["ContactLinkIn"][];
+        };
+        /**
+         * ContactShow
+         * @description A show a contact is linked to, seen from the contact
+         */
+        ContactShow: {
+            show: components["schemas"]["Show"];
+            /** Roles */
+            roles: ("venue" | "promoter" | "contact")[];
+        };
         /**
          * Created
          * @description Answer when something new was created
@@ -874,8 +1141,6 @@ export interface components {
             website: string | null;
             /** Deadline */
             deadline: string | null;
-            /** Contact */
-            contact: string | null;
             /** Notes */
             notes: string | null;
             /** Active */
@@ -891,6 +1156,8 @@ export interface components {
             /** Applications */
             applications: components["schemas"]["ApplicationWithDeadline"][];
             seasons: components["schemas"]["Seasons"];
+            /** Contacts */
+            contacts: components["schemas"]["ContactDetails"][];
         };
         /** FestivalIn */
         FestivalIn: {
@@ -906,8 +1173,6 @@ export interface components {
             website?: string | null;
             /** Deadline */
             deadline?: string | null;
-            /** Contact */
-            contact?: string | null;
             /** Notes */
             notes?: string | null;
             /**
@@ -915,6 +1180,11 @@ export interface components {
              * @default true
              */
             active: boolean;
+            /**
+             * Contacts
+             * @default []
+             */
+            contacts: number[];
         };
         /** FestivalList */
         FestivalList: {
@@ -927,6 +1197,8 @@ export interface components {
         FestivalRow: {
             festival: components["schemas"]["Festival"];
             application: components["schemas"]["Application"] | null;
+            /** Contacts */
+            contacts: components["schemas"]["Contact"][];
         };
         /**
          * FestivalSaveIn
@@ -945,8 +1217,6 @@ export interface components {
             website?: string | null;
             /** Deadline */
             deadline?: string | null;
-            /** Contact */
-            contact?: string | null;
             /** Notes */
             notes?: string | null;
             /**
@@ -954,6 +1224,11 @@ export interface components {
              * @default true
              */
             active: boolean;
+            /**
+             * Contacts
+             * @default []
+             */
+            contacts: number[];
             /** Applications */
             applications: components["schemas"]["ApplicationIn"][];
         };
@@ -1036,6 +1311,8 @@ export interface components {
         OverviewRow: {
             festival: components["schemas"]["Festival"];
             application: components["schemas"]["Application"] | null;
+            /** Contacts */
+            contacts: components["schemas"]["Contact"][];
             /**
              * Status
              * @enum {string}
@@ -1244,16 +1521,6 @@ export interface components {
              * @enum {string}
              */
             status: "option" | "confirmed" | "cancelled";
-            /** Venue */
-            venue: string | null;
-            /** Address */
-            address: string | null;
-            /** Contactname */
-            contactName: string | null;
-            /** Contactphone */
-            contactPhone: string | null;
-            /** Contactemail */
-            contactEmail: string | null;
             /** Fee */
             fee: string | null;
             /** Guestquota */
@@ -1273,6 +1540,36 @@ export interface components {
             /** Updatedat */
             updatedAt: string;
         };
+        /**
+         * ShowContact
+         * @description A contact from the contact list linked to a show
+         */
+        ShowContact: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "venue" | "promoter" | "contact";
+            details: components["schemas"]["ContactDetails"];
+        };
+        /**
+         * ShowContactsIn
+         * @description All contacts of the show as they should be afterwards, by contact ID and in this order
+         */
+        ShowContactsIn: {
+            /** Venue */
+            venue?: number | null;
+            /**
+             * Promoters
+             * @default []
+             */
+            promoters: number[];
+            /**
+             * Contacts
+             * @default []
+             */
+            contacts: number[];
+        };
         /** ShowDetails */
         ShowDetails: {
             show: components["schemas"]["Show"];
@@ -1281,6 +1578,8 @@ export interface components {
             /** Guests */
             guests: components["schemas"]["Guest"][];
             packing: components["schemas"]["ShowPacking"] | null;
+            /** Contacts */
+            contacts: components["schemas"]["ShowContact"][];
         };
         /** ShowIn */
         ShowIn: {
@@ -1296,16 +1595,6 @@ export interface components {
             status: "option" | "confirmed" | "cancelled";
             /** Tour */
             tour?: string | null;
-            /** Venue */
-            venue?: string | null;
-            /** Address */
-            address?: string | null;
-            /** Contactname */
-            contactName?: string | null;
-            /** Contactphone */
-            contactPhone?: string | null;
-            /** Contactemail */
-            contactEmail?: string | null;
             /** Fee */
             fee?: string | null;
             /** Guestquota */
@@ -1342,6 +1631,7 @@ export interface components {
         /** ShowRow */
         ShowRow: {
             show: components["schemas"]["Show"];
+            venue: components["schemas"]["Contact"] | null;
             /** Showtime */
             showtime: string | null;
             /** Guestcount */
@@ -2160,6 +2450,72 @@ export interface operations {
             };
         };
     };
+    set_contacts_api_v1_shows__show_id__contacts_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                show_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShowContactsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShowDetails"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    shows_of_contact_api_v1_contacts__contact_id__shows_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactShow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     set_packing_list_api_v1_shows__show_id__packing_list_put: {
         parameters: {
             query?: never;
@@ -2271,6 +2627,201 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScheduleTemplate"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    contact_list_api_v1_contacts_get: {
+        parameters: {
+            query?: {
+                q?: string;
+                kind?: string;
+                role?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_contact_api_v1_contacts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Created"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    contact_options_api_v1_contacts_options_get: {
+        parameters: {
+            query?: {
+                kind?: string;
+                role?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactRef"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    contact_details_api_v1_contacts__contact_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDetails"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_contact_api_v1_contacts__contact_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactSaveIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDetails"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_contact_api_v1_contacts__contact_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

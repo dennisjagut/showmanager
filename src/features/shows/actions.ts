@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { api, formBody } from "@/lib/api/client";
 import { idOf } from "@/lib/api/path";
-import type { Created, ScheduleTemplate, TemplatesSave } from "@/lib/api/types";
+import type { Created, ScheduleTemplate, ShowContacts, TemplatesSave } from "@/lib/api/types";
 
 // The Server Actions only pass the forms on to the API, which validates and saves.
 
@@ -55,6 +55,15 @@ export async function deleteGuest(formData: FormData) {
   const showId = idOf(formData.get("showId"));
   await api.delete(`/shows/${showId}/guests/${idOf(formData.get("id"))}`);
   refresh(showId);
+}
+
+// Links promoters and people to talk to from the contact list, all of them at once in their order. The contacts show
+// their shows, so their pages are refreshed too.
+export async function setShowContacts(showId: number, body: ShowContacts) {
+  const id = idOf(String(showId));
+  await api.put(`/shows/${id}/contacts`, body);
+  refresh(id);
+  revalidatePath("/contacts/[id]", "page");
 }
 
 // Picks the show's packing list right on the show page, without the edit form

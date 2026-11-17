@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
-import type { Show } from "@/lib/api/types";
-import { logisticsBlocks } from "@/features/shows/infos";
+import { PhoneLink } from "@/features/contacts/components/ContactChannels";
+import type { Show, ShowContact } from "@/lib/api/types";
+import { PEOPLE_ROLES, contactsOf, logisticsBlocks, positionAt } from "@/features/shows/infos";
 
 export function InfoBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -11,23 +12,38 @@ export function InfoBlock({ title, children }: { title: string; children: React.
   );
 }
 
-export function ContactInfo({ show }: { show: Show }) {
-  const t = useTranslations("showInfo");
-  if (!show.contactName && !show.contactPhone && !show.contactEmail) return null;
+// Promoters and people to talk to with phone and email, for the daysheet
+export function ContactsInfo({ contacts }: { contacts: ShowContact[] }) {
+  const t = useTranslations("showContacts");
+  const promoterIds = contactsOf(contacts, "promoter").map((d) => d.contact.id);
   return (
-    <InfoBlock title={t("contact")}>
-      {show.contactName && <div>{show.contactName}</div>}
-      {show.contactPhone && (
-        <a href={`tel:${show.contactPhone.replace(/[^\d+]/g, "")}`} className="block link">
-          {show.contactPhone}
-        </a>
-      )}
-      {show.contactEmail && (
-        <a href={`mailto:${show.contactEmail}`} className="block link">
-          {show.contactEmail}
-        </a>
-      )}
-    </InfoBlock>
+    <>
+      {PEOPLE_ROLES.map((role) => {
+        const list = contactsOf(contacts, role);
+        if (list.length === 0) return null;
+        return (
+          <InfoBlock key={role} title={t(`roles.${role}`)}>
+            <ul className="space-y-2 whitespace-normal">
+              {list.map((d) => {
+                const position = positionAt(d, promoterIds);
+                return (
+                  <li key={d.contact.id}>
+                    <div className="font-medium">{d.contact.name}</div>
+                    {position && <div className="text-zinc-500">{position}</div>}
+                    {d.contact.phone && <PhoneLink phone={d.contact.phone} className="block" />}
+                    {d.contact.email && (
+                      <a href={`mailto:${d.contact.email}`} className="block link">
+                        {d.contact.email}
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </InfoBlock>
+        );
+      })}
+    </>
   );
 }
 

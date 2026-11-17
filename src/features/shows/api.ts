@@ -1,6 +1,6 @@
 import { api, query } from "@/lib/api/client";
 import { idOf } from "@/lib/api/path";
-import type { ScheduleTemplate, ShowDetails, ShowList } from "@/lib/api/types";
+import type { ContactShow, ScheduleTemplate, ShowDetails, ShowList } from "@/lib/api/types";
 import { param, type SearchParams } from "@/lib/search-params";
 
 // Reading from the API
@@ -25,4 +25,9 @@ export function getTours() {
 
 export function getTemplates() {
   return api.get<ScheduleTemplate[]>("/templates");
+}
+
+// Shows a contact is linked to, newest first, with its role there
+export function getShowsOfContact(contactId: string) {
+  return api.get<ContactShow[]>(`/contacts/${idOf(contactId)}/shows`);
 }
