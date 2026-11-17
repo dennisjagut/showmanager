@@ -4,7 +4,7 @@ from ..core import db
 from .models import Application, ApplicationStatus, Festival
 from .schemas import ApplicationIn
 
-FESTIVAL_FIELDS = ["name", "location", "state", "month", "website", "deadline", "contact", "notes", "active"]
+FESTIVAL_FIELDS = ["name", "location", "state", "month", "website", "deadline", "notes", "active"]
 
 
 def _application_of(row: db.Row) -> Application | None:
@@ -54,25 +54,52 @@ def find_states() -> list[str]:
     return [r["state"] for r in db.query("select distinct state from festivals where state is not null order by state")]
 
 
-def insert(values: dict[str, object]) -> int:
-    with db.write() as w:
-        return w.execute(
-            f"insert into festivals ({', '.join(FESTIVAL_FIELDS)}) values ({', '.join('?' * len(FESTIVAL_FIELDS))})",
-            [values[k] for k in FESTIVAL_FIELDS],
+def find_contact_links(festival_id: int | None = None) -> dict[int, list[int]]:
+    """Contact IDs per festival in their order, of one festival or of all"""
+    if festival_id is None:
+        rows = db.query("select * from festival_contacts order by festival_id, sort_order")
+    else:
+        rows = db.query("select * from festival_contacts where festival_id = ? order by sort_order", (festival_id,))
+    links: dict[int, list[int]] = {}
+    for r in rows:
+        links.setdefault(r["festival_id"], []).append(r["contact_id"])
+    return links
+
+
+def _save_contacts(w: db.Writer, festival_id: int, contact_ids: list[int]) -> None:
+    w.execute("delete from festival_contacts where festival_id = ?", (festival_id,))
+    for index, contact_id in enumerate(contact_ids):
+        w.execute(
+            "insert into festival_contacts (festival_id, contact_id, sort_order) values (?, ?, ?)",
+            (festival_id, contact_id, (index + 1) * 10),
         )
 
 
-def delete(festival_id: int) -> None:
-    """Deletes the festival with all its applications"""
+def insert(values: dict[str, object], contact_ids: list[int]) -> int:
     with db.write() as w:
+        festival_id = w.execute(
+            f"insert into festivals ({', '.join(FESTIVAL_FIELDS)}) values ({', '.join('?' * len(FESTIVAL_FIELDS))})",
+            [values[k] for k in FESTIVAL_FIELDS],
+        )
+        assert festival_id is not None
+        _save_contacts(w, festival_id, contact_ids)
+        return festival_id
+
+
+def delete(festival_id: int) -> None:
+    """Deletes the festival with all its applications and links to contacts; the contacts stay"""
+    with db.write() as w:
+        w.execute("delete from festival_contacts where festival_id = ?", (festival_id,))
         w.execute("delete from applications where festival_id = ?", (festival_id,))
         w.execute("delete from festivals where id = ?", (festival_id,))
 
 
-def save_with_applications(festival_id: int, values: dict[str, object], applications: list[ApplicationIn]) -> None:
+def save_with_applications(
+    festival_id: int, values: dict[str, object], applications: list[ApplicationIn], contact_ids: list[int]
+) -> None:
     """
-    Saves the festival and all its applications in one transaction: seasons in the list are created or overwritten,
-    the other seasons of the festival are deleted
+    Saves the festival, all its applications and its contacts in one transaction: seasons in the list are created or
+    overwritten, the other seasons of the festival are deleted
     """
     seasons = [a.season for a in applications]
     with db.write() as w:
@@ -91,6 +118,7 @@ def save_with_applications(festival_id: int, values: dict[str, object], applicat
                      updated_at = datetime('now')""",
                 (festival_id, a.season, a.status, a.applied_on, a.note),
             )
+        _save_contacts(w, festival_id, contact_ids)
 
 
 def save_status(festival_id: int, season: int, status: ApplicationStatus, applied_on: str | None) -> None:

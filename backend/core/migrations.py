@@ -223,7 +223,131 @@ SELECT `show_id`, `item_id`, 'packed' FROM `show_packed_items`;""",
         ],
     ),
     (
-        "0006_festival_fixed_fields",
+        "0006_contacts",
+        [
+            """-- People and organizations the band works with. kind is 'person' or 'organization'.
+CREATE TABLE `contacts` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`kind` text NOT NULL,
+	`name` text NOT NULL,
+	`email` text,
+	`phone` text,
+	`website` text,
+	`street` text,
+	`location` text,
+	`notes` text,
+	`created_at` text DEFAULT (datetime('now')) NOT NULL,
+	`updated_at` text DEFAULT (datetime('now')) NOT NULL
+);""",
+            """-- What a contact is for the band, e.g. promoter and venue at once. The roles are fixed in the code.
+CREATE TABLE `contact_roles` (
+	`contact_id` integer NOT NULL,
+	`role` text NOT NULL,
+	PRIMARY KEY (`contact_id`, `role`),
+	FOREIGN KEY (`contact_id`) REFERENCES `contacts`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """-- A person who works for an organization, with their position there (e.g. booker of a club)
+CREATE TABLE `contact_affiliations` (
+	`person_id` integer NOT NULL,
+	`organization_id` integer NOT NULL,
+	`position` text,
+	PRIMARY KEY (`person_id`, `organization_id`),
+	FOREIGN KEY (`person_id`) REFERENCES `contacts`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`organization_id`) REFERENCES `contacts`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """CREATE INDEX `contact_affiliations_organization` ON `contact_affiliations` (`organization_id`);""",
+        ],
+    ),
+    (
+        "0007_show_contacts",
+        [
+            """-- Contacts of a show, only from the contact list: its promoters and the people to talk to (role 'contact')
+CREATE TABLE `show_contacts` (
+	`show_id` integer NOT NULL,
+	`contact_id` integer NOT NULL,
+	`role` text NOT NULL,
+	`sort_order` integer DEFAULT 0 NOT NULL,
+	PRIMARY KEY (`show_id`, `contact_id`, `role`),
+	FOREIGN KEY (`show_id`) REFERENCES `shows`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`contact_id`) REFERENCES `contacts`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """CREATE INDEX `show_contacts_contact` ON `show_contacts` (`contact_id`);""",
+            """-- The free-text contact of the shows becomes a person in the contact list, the same one for identical entries.
+-- The columns contact_name, contact_phone and contact_email stay in the table but are no longer used.
+INSERT INTO `contacts` (`kind`, `name`, `email`, `phone`, `notes`)
+SELECT DISTINCT 'person', coalesce(`contact_name`, `contact_email`, `contact_phone`), `contact_email`, `contact_phone`,
+	'Aus den Angaben einer Show übernommen'
+FROM `shows`
+WHERE coalesce(`contact_name`, `contact_email`, `contact_phone`) IS NOT NULL;""",
+            """INSERT INTO `show_contacts` (`show_id`, `contact_id`, `role`, `sort_order`)
+SELECT s.`id`, c.`id`, 'contact', 10
+FROM `shows` s JOIN `contacts` c
+	ON c.`kind` = 'person' AND c.`notes` = 'Aus den Angaben einer Show übernommen'
+	AND c.`name` = coalesce(s.`contact_name`, s.`contact_email`, s.`contact_phone`)
+	AND c.`email` IS s.`contact_email` AND c.`phone` IS s.`contact_phone`;""",
+        ],
+    ),
+    (
+        "0008_show_venue_contacts",
+        [
+            """-- The free-text venue of the shows becomes an organization with the role venue, the same one for identical
+-- entries. "Straße, PLZ Ort" is split at the first comma, an address without one becomes the location.
+-- The columns venue and address stay in the table but are no longer used.
+INSERT INTO `contacts` (`kind`, `name`, `street`, `location`, `notes`)
+SELECT DISTINCT 'organization', coalesce(s.`venue`, s.`address`),
+	CASE WHEN instr(s.`address`, ',') > 0 THEN trim(substr(s.`address`, 1, instr(s.`address`, ',') - 1)) END,
+	CASE WHEN instr(s.`address`, ',') > 0 THEN trim(substr(s.`address`, instr(s.`address`, ',') + 1)) ELSE s.`address` END,
+	'Aus den Angaben einer Show übernommen'
+FROM `shows` s
+WHERE coalesce(s.`venue`, s.`address`) IS NOT NULL;""",
+            """INSERT OR IGNORE INTO `contact_roles` (`contact_id`, `role`)
+SELECT `id`, 'venue' FROM `contacts` WHERE `kind` = 'organization' AND `notes` = 'Aus den Angaben einer Show übernommen';""",
+            """INSERT INTO `show_contacts` (`show_id`, `contact_id`, `role`, `sort_order`)
+SELECT s.`id`, c.`id`, 'venue', 10
+FROM `shows` s JOIN `contacts` c
+	ON c.`kind` = 'organization' AND c.`notes` = 'Aus den Angaben einer Show übernommen'
+	AND c.`name` = coalesce(s.`venue`, s.`address`)
+	AND c.`street` IS CASE WHEN instr(s.`address`, ',') > 0 THEN trim(substr(s.`address`, 1, instr(s.`address`, ',') - 1)) END
+	AND c.`location` IS CASE WHEN instr(s.`address`, ',') > 0 THEN trim(substr(s.`address`, instr(s.`address`, ',') + 1)) ELSE s.`address` END;""",
+        ],
+    ),
+    (
+        "0009_festival_contacts",
+        [
+            """-- Contacts of a festival application, only from the contact list. Linked from the festival to the contact only.
+CREATE TABLE `festival_contacts` (
+	`festival_id` integer NOT NULL,
+	`contact_id` integer NOT NULL,
+	`sort_order` integer DEFAULT 0 NOT NULL,
+	PRIMARY KEY (`festival_id`, `contact_id`),
+	FOREIGN KEY (`festival_id`) REFERENCES `festivals`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`contact_id`) REFERENCES `contacts`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """CREATE INDEX `festival_contacts_contact` ON `festival_contacts` (`contact_id`);""",
+            """-- The free-text contact of a festival becomes an organization named like the festival, with the role festival and
+-- the festival's location and website. A single email address becomes its email, any other text (people, form links …)
+-- is kept in its notes. Identical entries become one contact. The column contact stays but is no longer used.
+INSERT INTO `contacts` (`kind`, `name`, `email`, `website`, `location`, `notes`)
+SELECT DISTINCT 'organization', f.`name`,
+	CASE WHEN trim(f.`contact`) LIKE '%_@_%._%' AND instr(trim(f.`contact`), ' ') = 0 AND instr(f.`contact`, char(10)) = 0 AND trim(f.`contact`) NOT LIKE 'http%' AND trim(f.`contact`) NOT LIKE 'www.%' THEN trim(f.`contact`) END,
+	f.`website`, f.`location`,
+	CASE WHEN trim(f.`contact`) LIKE '%_@_%._%' AND instr(trim(f.`contact`), ' ') = 0 AND instr(f.`contact`, char(10)) = 0 AND trim(f.`contact`) NOT LIKE 'http%' AND trim(f.`contact`) NOT LIKE 'www.%' THEN 'Aus den Angaben eines Festivals übernommen' ELSE 'Aus den Angaben eines Festivals übernommen:' || char(10) || f.`contact` END
+FROM `festivals` f
+WHERE f.`contact` IS NOT NULL;""",
+            """INSERT OR IGNORE INTO `contact_roles` (`contact_id`, `role`)
+SELECT `id`, 'festival' FROM `contacts` WHERE `kind` = 'organization' AND `notes` LIKE 'Aus den Angaben eines Festivals übernommen%';""",
+            """INSERT OR IGNORE INTO `festival_contacts` (`festival_id`, `contact_id`, `sort_order`)
+SELECT f.`id`, c.`id`, 10
+FROM `festivals` f JOIN `contacts` c
+	ON c.`kind` = 'organization' AND c.`name` = f.`name`
+	AND c.`email` IS CASE WHEN trim(f.`contact`) LIKE '%_@_%._%' AND instr(trim(f.`contact`), ' ') = 0 AND instr(f.`contact`, char(10)) = 0 AND trim(f.`contact`) NOT LIKE 'http%' AND trim(f.`contact`) NOT LIKE 'www.%' THEN trim(f.`contact`) END
+	AND c.`website` IS f.`website` AND c.`location` IS f.`location`
+	AND c.`notes` = CASE WHEN trim(f.`contact`) LIKE '%_@_%._%' AND instr(trim(f.`contact`), ' ') = 0 AND instr(f.`contact`, char(10)) = 0 AND trim(f.`contact`) NOT LIKE 'http%' AND trim(f.`contact`) NOT LIKE 'www.%' THEN 'Aus den Angaben eines Festivals übernommen' ELSE 'Aus den Angaben eines Festivals übernommen:' || char(10) || f.`contact` END
+WHERE f.`contact` IS NOT NULL;""",
+        ],
+    ),
+    (
+        "0010_festival_fixed_fields",
         [
             """-- Festival month, deadline and federal state were free text. From now on the month is a number (1 = January),
 -- the deadline an ISO date that repeats every year and the state one of the 16 codes. Text that does not fit is kept

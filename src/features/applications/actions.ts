@@ -20,8 +20,22 @@ export async function setStatus(festivalId: number, season: number, status: stri
   refresh(id);
 }
 
+// The contacts come as a JSON list of IDs from FestivalForm; the API skips unknown ones
+function contactIds(formData: FormData): number[] {
+  try {
+    const value: unknown = JSON.parse(String(formData.get("contacts") ?? "[]"));
+    return Array.isArray(value) ? value.filter((id): id is number => Number.isInteger(id)) : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function createFestival(formData: FormData) {
-  const { id } = await api.post<Created>("/festivals", formBody(formData, { checkboxes: ["active"] }));
+  const body = {
+    ...formBody(formData, { checkboxes: ["active"], omit: ["contacts"] }),
+    contacts: contactIds(formData),
+  };
+  const { id } = await api.post<Created>("/festivals", body);
   refresh(String(id));
   redirect(`/festivals/${id}?saved=1`);
 }

@@ -1,4 +1,4 @@
-"""Entities of the module, as they are stored in the tables festivals and applications."""
+"""Entities of the module, as they are stored in the tables festivals, applications and festival_contacts."""
 
 from typing import Literal
 
@@ -22,7 +22,6 @@ class Festival(ApiModel):
     website: str | None
     # Application deadline as ISO date. It repeats every year, so for each season only day and month count.
     deadline: str | None
-    contact: str | None
     notes: str | None
     # False for festivals that no longer exist
     active: bool

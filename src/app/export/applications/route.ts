@@ -12,7 +12,7 @@ const COLUMNS = [
   "month",
   "website",
   "deadline",
-  "contact",
+  "contacts",
   "notes",
   "active",
   "status",
@@ -31,14 +31,14 @@ export async function GET(request: Request) {
   ]);
 
   const header = COLUMNS.map((c) => (c === "status" ? t("status", { season }) : t(c)));
-  const content = rows.map(({ festival: f, application: a }) => [
+  const content = rows.map(({ festival: f, application: a, contacts }) => [
     f.name,
     f.location,
     f.state,
     monthName(f.month, locale),
     f.website,
     f.deadline && formatDayMonth(f.deadline, locale),
-    f.contact,
+    contacts.map((c) => [c.name, c.email, c.phone].filter(Boolean).join(", ")).join("\n"),
     f.notes,
     f.active ? tc("yes") : tc("no"),
     ts(a?.status ?? "open"),

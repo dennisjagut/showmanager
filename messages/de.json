@@ -30,6 +30,7 @@
     "saveError": "Nicht gespeichert. Bitte die Eingaben prüfen und nochmal versuchen.",
     "saveShortcut": "Strg + S oder ⌘ + S",
     "cancel": "Abbrechen",
+    "close": "Schließen",
     "nameRequired": "Bitte einen Namen eingeben."
   },
   "errors": {
@@ -76,6 +77,7 @@
   "modules": {
     "applications": "Bewerbungen",
     "shows": "Shows",
+    "contacts": "Kontakte",
     "calculator": "Kalkulator",
     "data": "Export",
     "masterdata": "Basisdaten"
@@ -107,7 +109,7 @@
       "festival": "Festival",
       "month": "Monat",
       "deadline": "Deadline",
-      "contact": "Kontakt",
+      "contact": "Kontakte",
       "status": "Status {season}",
       "appliedNote": "Beworben / Notiz"
     },
@@ -162,7 +164,13 @@
     "removed": "Bewerbung für Saison {season} wird beim Speichern entfernt",
     "noApplicationsYet": "Noch keine Bewerbung erfasst.",
     "editTitle": "{name} bearbeiten",
-    "noMasterData": "Noch keine weiteren Angaben."
+    "noMasterData": "Noch keine weiteren Angaben.",
+    "noContacts": "Noch keine Kontakte verknüpft.",
+    "addContact": "+ Kontakt",
+    "removeContact": "{name} entfernen",
+    "pickContacts": "Kontakte auswählen",
+    "pickContactsHint": "Nur Kontakte aus eurer Kontaktliste, z. B. das Festival selbst oder die Person fürs Booking.",
+    "suggestedContacts": "Passend zum Festival"
   },
   "festivalForm": {
     "name": "Name *",
@@ -175,8 +183,7 @@
     "deadlineYearly": "jedes Jahr am {date}",
     "none": "–",
     "website": "Website",
-    "contact": "Kontakt",
-    "contactPlaceholder": "E-Mail, Formular-Link, Ansprechpartner …",
+    "contacts": "Kontakte",
     "notes": "Hinweise",
     "active": "Festival existiert noch (aktiv)",
     "create": "Festival anlegen"
@@ -207,6 +214,7 @@
     "season": "Saison {season}",
     "download": "Herunterladen",
     "exportShows": "🎤 Shows mit Tagesablauf und Gästeliste (CSV)",
+    "exportContacts": "📇 Kontakte mit Rollen und Verknüpfungen (CSV)",
     "exportCalculator": "🧮 Kalkulator: Posten und aktuelle Anfrage (CSV)",
     "backup": "<strong>Komplettes Backup</strong> aller Module und Saisons (JSON)",
     "downloadBackup": "Backup herunterladen"
@@ -220,7 +228,7 @@
       "month": "Monat",
       "website": "Website",
       "deadline": "Deadline Bewerbung",
-      "contact": "Kontakt",
+      "contacts": "Kontakte",
       "notes": "Hinweise",
       "active": "Aktiv",
       "status": "Status {season}",
@@ -237,9 +245,8 @@
         "status": "Status",
         "venue": "Venue",
         "address": "Adresse",
-        "contact": "Kontakt",
-        "phone": "Telefon",
-        "email": "E-Mail",
+        "promoters": "Veranstalter",
+        "contacts": "Ansprechpersonen",
         "fee": "Gage / Deal",
         "guestQuota": "Gästeliste-Kontingent",
         "guests": "Gäste (Personen)",
@@ -280,6 +287,19 @@
       "daysOnSite": "{count, plural, one {# Tag} other {# Tage}} vor Ort",
       "buffer": "{percent} % Puffer",
       "total": "Fixkosten gesamt €"
+    },
+    "contacts": {
+      "filename": "kontakte.csv",
+      "kind": "Art",
+      "name": "Name",
+      "roles": "Rollen",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "website": "Website",
+      "street": "Straße",
+      "location": "Ort",
+      "links": "Verknüpft mit",
+      "notes": "Notizen"
     }
   },
   "showStatus": {
@@ -288,12 +308,44 @@
     "cancelled": "Abgesagt"
   },
   "showInfo": {
-    "contact": "Veranstalter / Kontakt",
     "fee": "Gage / Deal",
     "travel": "Anreise",
     "hotel": "Hotel / Übernachtung",
     "tech": "Technik & Backline",
     "notes": "Sonstige Hinweise"
+  },
+  "showContacts": {
+    "title": "Kontakte",
+    "roles": {
+      "venue": "Venue",
+      "promoter": "Veranstalter",
+      "contact": "Ansprechpersonen"
+    },
+    "add": {
+      "venue": "+ Venue",
+      "promoter": "+ Veranstalter",
+      "contact": "+ Ansprechperson"
+    },
+    "empty": {
+      "venue": "Noch keine Venue verknüpft.",
+      "promoter": "Noch kein Veranstalter verknüpft.",
+      "contact": "Noch keine Ansprechperson verknüpft."
+    },
+    "pick": {
+      "venue": "Venue auswählen",
+      "promoter": "Veranstalter auswählen",
+      "contact": "Ansprechpersonen auswählen"
+    },
+    "pickHint": "Nur Kontakte aus eurer Kontaktliste.",
+    "change": "Ändern",
+    "theVenue": "Die Venue",
+    "atOrganizations": "Bei {names}",
+    "remove": "{name} von der Show entfernen",
+    "roleAtShow": {
+      "venue": "Venue",
+      "promoter": "Veranstalter",
+      "contact": "Ansprechperson"
+    }
   },
   "shows": {
     "title": "Shows",
@@ -387,14 +439,9 @@
     "status": "Status",
     "tour": "Tour / Reihe",
     "tourPlaceholder": "optional, z. B. Sommer 2027",
-    "venue": "Venue",
-    "venuePlaceholder": "Club, Festivalgelände, Bühne …",
-    "address": "Adresse",
-    "addressPlaceholder": "Straße, PLZ Ort",
-    "promoter": "Veranstalter & Deal",
-    "contactName": "Ansprechpartner",
-    "contactPhone": "Telefon",
-    "contactEmail": "E-Mail",
+    "deal": "Deal",
+    "contactsHint": "Venue, Veranstalter und Ansprechpersonen verknüpft ihr auf der Show-Seite, nur aus euren Kontakten.",
+    "contactsHintNew": "Venue, Veranstalter und Ansprechpersonen verknüpft ihr nach dem Anlegen auf der Show-Seite, nur aus euren Kontakten.",
     "feePlaceholder": "z. B. 400 € + Catering + Fahrtkosten",
     "guestQuota": "Gästelistenplätze",
     "logistics": "Logistik",
@@ -621,5 +668,160 @@
     "newCategory": "Neue Kategorie",
     "newCategoryPlaceholder": "z. B. Kabel, Instrumente, Drums",
     "addCategory": "Kategorie anlegen"
+  },
+  "contactKind": {
+    "person": "Person",
+    "organization": "Organisation"
+  },
+  "contactKinds": {
+    "all": "Alle",
+    "person": "Personen",
+    "organization": "Organisationen"
+  },
+  "contactRole": {
+    "promoter": "Veranstalter",
+    "venue": "Location",
+    "festival": "Festival",
+    "band": "Band",
+    "booking": "Booking",
+    "management": "Management",
+    "label": "Label",
+    "media": "Presse & Medien",
+    "service": "Technik & Dienstleister",
+    "other": "Sonstiges"
+  },
+  "contactRoleHint": {
+    "promoter": "Veranstaltet Shows und bucht Bands",
+    "venue": "Club, Halle oder Bühne, in der gespielt wird",
+    "festival": "Festival, bei dem man sich bewirbt oder spielt",
+    "band": "Andere Band oder Künstler:in, z. B. Support oder Co-Headliner. Veranstaltet sie selbst, zusätzlich „Veranstalter“ wählen.",
+    "booking": "Bookingagentur oder Booker:in",
+    "management": "Management von Bands oder Künstler:innen",
+    "label": "Plattenlabel oder Vertrieb",
+    "media": "Presse, Radio, Blogs, Promo",
+    "service": "Ton, Licht, Backline-Verleih, Foto, Video, Transport …",
+    "other": "Passt in keine andere Rolle"
+  },
+  "contacts": {
+    "title": "Kontakte",
+    "intro": "Personen und Organisationen, mit denen ihr immer wieder zu tun habt: Veranstalter, Locations, Bookingagenturen, andere Bands und alle anderen. Einmal hier pflegen, dann bei Shows und später bei Festivalbewerbungen wiederverwenden.",
+    "exportCsv": "CSV exportieren",
+    "newPerson": "+ Person",
+    "newOrganization": "+ Organisation",
+    "kindsLabel": "Art der Kontakte",
+    "search": "Suche",
+    "searchPlaceholder": "Name, E-Mail, Ort, Funktion, Notiz …",
+    "empty": "Noch keine Kontakte. Legt zuerst die Organisationen an (z. B. Veranstalter und Locations), dann die Personen dazu.",
+    "noResults": "Keine Kontakte für diese Filter.",
+    "columns": {
+      "name": "Name",
+      "roles": "Rollen",
+      "contact": "Kontakt",
+      "links": "Verknüpft mit"
+    },
+    "allContacts": "← Alle Kontakte",
+    "newTitle": {
+      "person": "Neue Person",
+      "organization": "Neue Organisation"
+    },
+    "create": {
+      "person": "Person anlegen",
+      "organization": "Organisation anlegen"
+    },
+    "editTitle": "{name} bearbeiten",
+    "details": "Kontaktdaten",
+    "noDetails": "Noch keine Kontaktdaten.",
+    "roles": "Rollen",
+    "rolesHint": {
+      "person": "Was die Person selbst für euch ist, z. B. freie:r Booker:in oder Tontechniker:in. Für wen sie arbeitet, kommt unter Organisation.",
+      "organization": "Mehrere möglich, z. B. Location und Veranstalter bei einem Club, der selbst bucht, oder Band und Veranstalter bei einer Band, die selbst Shows organisiert."
+    },
+    "links": {
+      "person": "Organisationen",
+      "organization": "Ansprechpartner:innen"
+    },
+    "linksHint": {
+      "person": "Für welche Organisationen die Person arbeitet und in welcher Funktion.",
+      "organization": "Wer bei dieser Organisation für euch zuständig ist und wofür."
+    },
+    "noLinks": {
+      "person": "Gehört zu keiner Organisation.",
+      "organization": "Noch keine Ansprechpartner:innen."
+    },
+    "addLink": {
+      "person": "Organisation verknüpfen",
+      "organization": "Person verknüpfen"
+    },
+    "choose": "– auswählen –",
+    "newLink": "＋ Neue {kind} anlegen …",
+    "newLinkName": "Name der neuen {kind} *",
+    "newLinkHint": "Wird beim Speichern als neue {kind} angelegt.",
+    "linkNameRequired": "Bitte einen Namen eingeben oder die Zeile entfernen.",
+    "linkRemoved": "{name} wird beim Speichern entfernt",
+    "removeLink": "{name} entfernen",
+    "position": "Funktion",
+    "positionPlaceholder": "z. B. Booking, Produktionsleitung",
+    "positionSuggestions": [
+      "Booking",
+      "Inhaber:in",
+      "Geschäftsführung",
+      "Programm",
+      "Produktionsleitung",
+      "Haustechnik",
+      "Tontechnik",
+      "Lichttechnik",
+      "Gastro",
+      "Abendkasse",
+      "Presse",
+      "Tourmanagement"
+    ],
+    "delete": {
+      "person": "Person löschen",
+      "organization": "Organisation löschen"
+    },
+    "deleteConfirm": "„{name}“ löschen? Verknüpfte Personen, Organisationen und Shows bleiben erhalten, nur die Verknüpfung fällt weg.",
+    "shows": "Shows",
+    "noShows": "Noch mit keiner Show verknüpft."
+  },
+  "contactForm": {
+    "kind": "Art",
+    "kindHint": "Lässt sich später nicht mehr ändern.",
+    "name": {
+      "person": "Vor- und Nachname *",
+      "organization": "Name *"
+    },
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "website": "Website",
+    "street": "Straße und Hausnummer",
+    "location": "Ort (PLZ + Ort)",
+    "locationPlaceholder": "12345 Musterstadt",
+    "address": "Adresse",
+    "notes": "Notizen",
+    "notesPlaceholder": {
+      "person": "z. B. am besten per Signal erreichbar, isst vegan",
+      "organization": "z. B. Kapazität, Bühnenmaße, Ladezone, Deal-Konditionen"
+    }
+  },
+  "contactPicker": {
+    "search": "Suche",
+    "searchPlaceholder": "Name, E-Mail, Ort, Organisation …",
+    "role": "Rolle",
+    "allRoles": "Alle Rollen",
+    "allContacts": "Alle Kontakte",
+    "selected": "{count, plural, =0 {Nichts ausgewählt} one {# ausgewählt} other {# ausgewählt}}",
+    "confirm": "Übernehmen",
+    "noResults": "Keine Kontakte für diese Suche und Filter.",
+    "empty": "Noch keine Kontakte.",
+    "createNew": "＋ Neuen Kontakt anlegen",
+    "createNamed": "＋ „{name}“ als neuen Kontakt anlegen",
+    "quickCreate": "Neuer Kontakt",
+    "quickCreateName": "Name der {kind} *",
+    "quickCreateHint": "Weitere Angaben wie E-Mail oder Telefon könnt ihr später auf der Seite des Kontakts ergänzen.",
+    "duplicate": "„{name}“ gibt es schon in der Liste. Trotzdem neu anlegen?",
+    "withRole": "Mit der Rolle „{role}“",
+    "create": "Anlegen",
+    "createError": "Konnte nicht angelegt werden. Bitte nochmal versuchen.",
+    "justCreated": "Gerade angelegt"
   }
 }

@@ -6,10 +6,12 @@ from ..core.base import Created
 from . import service
 from .models import ScheduleTemplate
 from .schemas import (
+    ContactShow,
     GuestIn,
     PackingListChoiceIn,
     PackingMarkIn,
     ScheduleItemIn,
+    ShowContactsIn,
     ShowDetails,
     ShowIn,
     ShowList,
@@ -77,6 +79,21 @@ def add_guest(show_id: int, body: GuestIn) -> None:
 @router.delete("/shows/{show_id}/guests/{guest_id}")
 def delete_guest(show_id: int, guest_id: int) -> None:
     service.delete_guest(show_id, guest_id)
+
+
+@router.put("/shows/{show_id}/contacts")
+def set_contacts(show_id: int, body: ShowContactsIn) -> ShowDetails:
+    """Links promoters and people to talk to from the contact list; contacts that are missing are unlinked"""
+    details = service.set_contacts(show_id, body)
+    if not details:
+        raise HTTPException(status_code=404, detail="Show not found")
+    return details
+
+
+@router.get("/contacts/{contact_id}/shows")
+def shows_of_contact(contact_id: int) -> list[ContactShow]:
+    """Shows a contact is linked to, newest first, each once with all its roles there"""
+    return service.shows_of_contact(contact_id)
 
 
 @router.put("/shows/{show_id}/packing-list")

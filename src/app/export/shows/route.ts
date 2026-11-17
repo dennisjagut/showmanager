@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { guestCount } from "@/features/shows/infos";
+import { PEOPLE_ROLES, contactsOf, guestCount, venueOf } from "@/features/shows/infos";
 import { allShowDetails } from "@/features/shows/api";
 import { csvResponse, csvText } from "@/lib/csv";
 import { formatDate } from "@/lib/dates";
@@ -13,9 +13,8 @@ const COLUMNS = [
   "status",
   "venue",
   "address",
-  "contact",
-  "phone",
-  "email",
+  "promoters",
+  "contacts",
   "fee",
   "guestQuota",
   "guests",
@@ -36,17 +35,19 @@ export async function GET() {
     getLocale(),
   ]);
 
-  const content = list.map(({ show: s, schedule, guests }) => {
+  const content = list.map(({ show: s, schedule, guests, contacts }) => {
     return [
       formatDate(s.date, locale),
       s.title,
       s.tour,
       ts(s.status),
-      s.venue,
-      s.address,
-      s.contactName,
-      s.contactPhone,
-      s.contactEmail,
+      venueOf(contacts)?.name,
+      [venueOf(contacts)?.street, venueOf(contacts)?.location].filter(Boolean).join(", "),
+      ...PEOPLE_ROLES.map((role) =>
+        contactsOf(contacts, role)
+          .map((d) => [d.contact.name, d.contact.phone, d.contact.email].filter(Boolean).join(", "))
+          .join("\n"),
+      ),
       s.fee,
       s.guestQuota,
       guestCount(guests),

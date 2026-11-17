@@ -3,7 +3,8 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/Card";
 import { FilterChip } from "@/components/ui/Chip";
 import { Page, PageHeader } from "@/components/ui/Page";
-import { Contact, WebsiteLink } from "@/features/applications/components/Contact";
+import { WebsiteLink } from "@/features/applications/components/WebsiteLink";
+import { LinkedContacts } from "@/features/contacts/components/ContactChannels";
 import { Deadline } from "@/features/applications/components/Deadline";
 import { FilterBar } from "@/features/applications/components/FilterBar";
 import { StatusSelect } from "@/features/applications/components/StatusSelect";
@@ -92,7 +93,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {rows.map(({ festival: f, application: a, status, deadline }) => (
+            {rows.map(({ festival: f, application: a, status, deadline, contacts }) => (
               <tr key={f.id} className={`align-top ${f.active ? "" : "opacity-50"}`}>
                 <td className="px-3 py-2.5">
                   <Link href={`/festivals/${f.id}?season=${season}`} className="font-medium hover:underline">
@@ -114,7 +115,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
                   <Deadline info={deadline} highlight={status === "open"} />
                 </td>
                 <td className="px-3 py-2.5 text-xs">
-                  <Contact text={f.contact} />
+                  <LinkedContacts contacts={contacts} />
                 </td>
                 <td className="px-3 py-2.5">
                   <StatusSelect festivalId={f.id} season={season} status={status} festivalName={f.name} />
@@ -133,7 +134,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
 
       {/* Cards on the phone */}
       <ul className="space-y-3 md:hidden">
-        {rows.map(({ festival: f, application: a, status, deadline }) => (
+        {rows.map(({ festival: f, application: a, status, deadline, contacts }) => (
           <li key={f.id} className={`space-y-2 card p-3 text-sm ${f.active ? "" : "opacity-50"}`}>
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -154,11 +155,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
                 <Deadline info={deadline} highlight={status === "open"} />
               </div>
             )}
-            {f.contact && (
-              <div className="text-xs">
-                <Contact text={f.contact} />
-              </div>
-            )}
+            <LinkedContacts contacts={contacts} className="text-xs" />
             {(a?.appliedOn || a?.note) && (
               <div className="text-xs text-zinc-600 dark:text-zinc-400">
                 {a?.appliedOn && `${t("appliedOnSentence", { date: formatDate(a.appliedOn, locale) })} `}
