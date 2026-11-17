@@ -7,9 +7,10 @@ from ..core.base import ApiModel
 
 ShowStatus = Literal["option", "confirmed", "cancelled"]
 
-# What a linked contact is for a show: its promoter, or a person to talk to (on site, production, booking …)
-ShowContactRole = Literal["promoter", "contact"]
-SHOW_CONTACT_ROLES: list[ShowContactRole] = ["promoter", "contact"]
+# What a linked contact is for a show: the venue where it takes place (one organization), its promoters, or a person to
+# talk to (on site, production, booking …)
+ShowContactRole = Literal["venue", "promoter", "contact"]
+SHOW_CONTACT_ROLES: list[ShowContactRole] = ["venue", "promoter", "contact"]
 
 # Packed for the trip to the show, or packed again after it
 PackingStage = Literal["packed", "repacked"]
@@ -23,8 +24,6 @@ class Show(ApiModel):
     # Free text to group shows into tours or series
     tour: str | None
     status: ShowStatus
-    venue: str | None
-    address: str | None
     # Fee or deal as free text
     fee: str | None
     # Number of guest list spots the band is entitled to

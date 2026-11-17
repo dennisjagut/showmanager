@@ -4,7 +4,7 @@ import { ContactsInfo, LogisticsInfo } from "@/features/shows/components/Infos";
 import { PdfButton } from "@/features/shows/components/PdfButton";
 import { PrintButton } from "@/features/shows/components/PrintButton";
 import { formatLongDate } from "@/lib/dates";
-import { guestCount, mapsLink, place } from "@/features/shows/infos";
+import { guestCount, mapsLink, place, venueOf } from "@/features/shows/infos";
 import { getShow } from "@/features/shows/api";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +20,8 @@ export default async function Daysheet({ params }: { params: Promise<{ id: strin
     getLocale(),
   ]);
   const { show: s, schedule, guests } = data;
-  const mapUrl = mapsLink(s);
+  const venue = venueOf(data.contacts);
+  const mapUrl = mapsLink(venue);
 
   return (
     <Page width="medium">
@@ -41,9 +42,9 @@ export default async function Daysheet({ params }: { params: Promise<{ id: strin
           </p>
           <h1 className="text-3xl font-bold tracking-tight">{s.title}</h1>
           <p className="text-lg">{formatLongDate(s.date, locale)}</p>
-          {(s.venue || s.address) && (
+          {venue && (
             <p className="mt-1">
-              {place(s)}
+              {place(venue)}
               {mapUrl && (
                 <a href={mapUrl} target="_blank" rel="noreferrer" className="ml-2 link print:hidden">
                   {tc("map")}

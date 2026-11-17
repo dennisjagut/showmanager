@@ -2,13 +2,15 @@ import { PDFDocument, type PDFFont, type PDFPage, rgb, StandardFonts } from "pdf
 import type { Guest, ScheduleItem, Show, ShowContact } from "@/lib/api/types";
 import { formatLongDate } from "@/lib/dates";
 import {
-  SHOW_CONTACT_ROLES,
+  PEOPLE_ROLES,
+  type PeopleRole,
   contactsOf,
   guestCount,
   type LogisticsField,
   logisticsBlocks,
   place,
   positionAt,
+  venueOf,
 } from "./infos";
 
 // A4 in points
@@ -33,7 +35,7 @@ export type DaysheetTexts = {
   schedule: string;
   noSchedule: string;
   // Headings of promoters and people to talk to
-  contacts: Record<ShowContact["role"], string>;
+  contacts: Record<PeopleRole, string>;
   logistics: Record<LogisticsField, string>;
   guestList: (people: number) => string;
   addedBy: (name: string) => string;
@@ -69,7 +71,8 @@ export async function daysheetPdf(
   });
   w.text(show.title, { size: 24, font: bold, spacing: 4 });
   w.text(date, { size: 14, spacing: 2 });
-  if (place(show)) w.text(place(show), { size: 11, spacing: 2 });
+  const venue = place(venueOf(contacts));
+  if (venue) w.text(venue, { size: 11, spacing: 2 });
   w.divider();
 
   w.heading(texts.schedule);
@@ -78,7 +81,7 @@ export async function daysheetPdf(
 
   const promoterIds = contactsOf(contacts, "promoter").map((d) => d.contact.id);
   const blocks: [string, string][] = [];
-  for (const role of SHOW_CONTACT_ROLES) {
+  for (const role of PEOPLE_ROLES) {
     const people = contactsOf(contacts, role).map((d) =>
       [d.contact.name, positionAt(d, promoterIds), d.contact.phone, d.contact.email].filter(Boolean).join("\n"),
     );

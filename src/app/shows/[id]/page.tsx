@@ -17,7 +17,7 @@ import { getPackingLists } from "@/features/masterdata/api";
 import { PackingListCard } from "@/features/shows/components/PackingListCard";
 import { ScheduleInput } from "@/features/shows/components/ScheduleInput";
 import { formatLongDate } from "@/lib/dates";
-import { guestCount, mapsLink, place } from "@/features/shows/infos";
+import { guestCount, mapsLink, place, venueOf } from "@/features/shows/infos";
 import { getShow, getTemplates } from "@/features/shows/api";
 import { SHOW_STATUS_TONE } from "@/features/shows/status";
 
@@ -38,7 +38,8 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
   const { show: s, schedule, guests, packing, contacts } = data;
 
   const people = guestCount(guests);
-  const mapUrl = mapsLink(s);
+  const venue = venueOf(contacts);
+  const mapUrl = mapsLink(venue);
   const full = s.guestQuota !== null && people >= s.guestQuota;
 
   return (
@@ -57,9 +58,11 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
               {formatLongDate(s.date, locale)} · <RelativeDay date={s.date} />
               {s.tour && ` · ${s.tour}`}
             </p>
-            {(s.venue || s.address) && (
+            {venue && (
               <p className="text-sm">
-                {place(s)}
+                <Link href={`/contacts/${venue.id}`} className="hover:underline">
+                  {place(venue)}
+                </Link>
                 {mapUrl && (
                   <>
                     {" "}

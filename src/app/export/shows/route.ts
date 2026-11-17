@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { SHOW_CONTACT_ROLES, contactsOf, guestCount } from "@/features/shows/infos";
+import { PEOPLE_ROLES, contactsOf, guestCount, venueOf } from "@/features/shows/infos";
 import { allShowDetails } from "@/features/shows/api";
 import { csvResponse, csvText } from "@/lib/csv";
 import { formatDate } from "@/lib/dates";
@@ -41,9 +41,9 @@ export async function GET() {
       s.title,
       s.tour,
       ts(s.status),
-      s.venue,
-      s.address,
-      ...SHOW_CONTACT_ROLES.map((role) =>
+      venueOf(contacts)?.name,
+      [venueOf(contacts)?.street, venueOf(contacts)?.location].filter(Boolean).join(", "),
+      ...PEOPLE_ROLES.map((role) =>
         contactsOf(contacts, role)
           .map((d) => [d.contact.name, d.contact.phone, d.contact.email].filter(Boolean).join(", "))
           .join("\n"),

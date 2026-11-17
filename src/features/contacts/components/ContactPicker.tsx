@@ -22,7 +22,8 @@ export type PickerFilters = { kind: ContactKind | null; role: ContactRole | null
 /**
  * Picks contacts from the contact list, in the Drawer: a drawer on the right from tablet width, a sheet from the
  * bottom on the phone. Only existing contacts can be chosen; a link opens the contacts in a new tab to add one.
- * Nothing changes until "Übernehmen", which hands the chosen IDs over in the order they were picked.
+ * Nothing changes until "Übernehmen", which hands the chosen IDs over in the order they were picked. With `single`,
+ * at most one can be chosen (picking another replaces it); with `onlyKind`, only people or only organizations.
  */
 export function ContactPicker({
   open,
@@ -33,6 +34,8 @@ export function ContactPicker({
   selected,
   defaults,
   suggested,
+  single = false,
+  onlyKind,
   saving = false,
   onConfirm,
 }: {
@@ -48,6 +51,8 @@ export function ContactPicker({
   defaults: PickerFilters;
   // Shown first, independent of the filters, e.g. the people of the show's promoter
   suggested?: { label: string; ids: number[] };
+  single?: boolean;
+  onlyKind?: ContactKind;
   saving?: boolean;
   onConfirm: (ids: number[]) => void;
 }) {
@@ -78,20 +83,27 @@ export function ContactPicker({
       .toLowerCase()
       .includes(query);
   const byId = new Map(contacts.map((d) => [d.contact.id, d]));
-  const suggestions = (suggested?.ids ?? []).flatMap((id) => byId.get(id) ?? []).filter(matches);
+  const allowed = (d: ContactDetails) => !onlyKind || d.contact.kind === onlyKind;
+  const suggestions = (suggested?.ids ?? [])
+    .flatMap((id) => byId.get(id) ?? [])
+    .filter((d) => allowed(d) && matches(d));
   const shownAbove = new Set(suggestions.map((d) => d.contact.id));
   const rest = contacts.filter(
     (d) =>
       !shownAbove.has(d.contact.id) &&
+      allowed(d) &&
       (!filters.kind || d.contact.kind === filters.kind) &&
       (!filters.role || d.roles.includes(filters.role)) &&
       matches(d),
   );
   const filtered = !!(query || filters.kind || filters.role);
-  const newKind = filters.kind ?? "organization";
+  const newKind = onlyKind ?? filters.kind ?? "organization";
 
   function toggle(id: number) {
-    setPicked((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]));
+    setPicked((list) => {
+      if (list.includes(id)) return list.filter((x) => x !== id);
+      return single ? [id] : [...list, id];
+    });
   }
 
   return (
@@ -139,20 +151,22 @@ export function ContactPicker({
           inputClassName="py-1.5"
         />
         <div className="flex flex-wrap items-end gap-2">
-          <Segmented>
-            {[null, ...CONTACT_KINDS].map((k) => (
-              <button
-                key={k ?? "all"}
-                type="button"
-                aria-pressed={filters.kind === k}
-                onClick={() => setFilters({ ...filters, kind: k })}
-                className={segmentClass(filters.kind === k)}
-              >
-                {k && <span aria-hidden>{CONTACT_KIND_ICON[k]} </span>}
-                {tk(k ?? "all")}
-              </button>
-            ))}
-          </Segmented>
+          {!onlyKind && (
+            <Segmented>
+              {[null, ...CONTACT_KINDS].map((k) => (
+                <button
+                  key={k ?? "all"}
+                  type="button"
+                  aria-pressed={filters.kind === k}
+                  onClick={() => setFilters({ ...filters, kind: k })}
+                  className={segmentClass(filters.kind === k)}
+                >
+                  {k && <span aria-hidden>{CONTACT_KIND_ICON[k]} </span>}
+                  {tk(k ?? "all")}
+                </button>
+              ))}
+            </Segmented>
+          )}
           <SelectField
             label={t("role")}
             value={filters.role ?? ""}

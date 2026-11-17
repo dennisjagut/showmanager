@@ -61,25 +61,11 @@ export function ShowForm({
           placeholder={t("tourPlaceholder")}
         />
         <DataList id="tours" values={tours} />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <TextField
-            label={t("venue")}
-            name="venue"
-            defaultValue={value("venue")}
-            placeholder={t("venuePlaceholder")}
-          />
-          <TextField
-            label={t("address")}
-            name="address"
-            defaultValue={value("address")}
-            placeholder={t("addressPlaceholder")}
-          />
-        </div>
+        <p className="text-sm text-zinc-500">{t(show ? "contactsHint" : "contactsHintNew")}</p>
       </fieldset>
 
       <fieldset className="space-y-3">
         <legend className="mb-2 section-title">{t("deal")}</legend>
-        <p className="text-sm text-zinc-500">{t(show ? "contactsHint" : "contactsHintNew")}</p>
         <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
           <TextField label={ti("fee")} name="fee" defaultValue={value("fee")} placeholder={t("feePlaceholder")} />
           <TextField

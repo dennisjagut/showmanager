@@ -287,4 +287,28 @@ FROM `shows` s JOIN `contacts` c
 	AND c.`email` IS s.`contact_email` AND c.`phone` IS s.`contact_phone`;""",
         ],
     ),
+    (
+        "0008_show_venue_contacts",
+        [
+            """-- The free-text venue of the shows becomes an organization with the role venue, the same one for identical
+-- entries. "Straße, PLZ Ort" is split at the first comma, an address without one becomes the location.
+-- The columns venue and address stay in the table but are no longer used.
+INSERT INTO `contacts` (`kind`, `name`, `street`, `location`, `notes`)
+SELECT DISTINCT 'organization', coalesce(s.`venue`, s.`address`),
+	CASE WHEN instr(s.`address`, ',') > 0 THEN trim(substr(s.`address`, 1, instr(s.`address`, ',') - 1)) END,
+	CASE WHEN instr(s.`address`, ',') > 0 THEN trim(substr(s.`address`, instr(s.`address`, ',') + 1)) ELSE s.`address` END,
+	'Aus den Angaben einer Show übernommen'
+FROM `shows` s
+WHERE coalesce(s.`venue`, s.`address`) IS NOT NULL;""",
+            """INSERT OR IGNORE INTO `contact_roles` (`contact_id`, `role`)
+SELECT `id`, 'venue' FROM `contacts` WHERE `kind` = 'organization' AND `notes` = 'Aus den Angaben einer Show übernommen';""",
+            """INSERT INTO `show_contacts` (`show_id`, `contact_id`, `role`, `sort_order`)
+SELECT s.`id`, c.`id`, 'venue', 10
+FROM `shows` s JOIN `contacts` c
+	ON c.`kind` = 'organization' AND c.`notes` = 'Aus den Angaben einer Show übernommen'
+	AND c.`name` = coalesce(s.`venue`, s.`address`)
+	AND c.`street` IS CASE WHEN instr(s.`address`, ',') > 0 THEN trim(substr(s.`address`, 1, instr(s.`address`, ',') - 1)) END
+	AND c.`location` IS CASE WHEN instr(s.`address`, ',') > 0 THEN trim(substr(s.`address`, instr(s.`address`, ',') + 1)) ELSE s.`address` END;""",
+        ],
+    ),
 ]

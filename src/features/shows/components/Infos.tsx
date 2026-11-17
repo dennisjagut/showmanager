@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { PhoneLink } from "@/features/contacts/components/ContactChannels";
 import type { Show, ShowContact } from "@/lib/api/types";
-import { SHOW_CONTACT_ROLES, contactsOf, logisticsBlocks, positionAt } from "@/features/shows/infos";
+import { PEOPLE_ROLES, contactsOf, logisticsBlocks, positionAt } from "@/features/shows/infos";
 
 export function InfoBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -18,7 +18,7 @@ export function ContactsInfo({ contacts }: { contacts: ShowContact[] }) {
   const promoterIds = contactsOf(contacts, "promoter").map((d) => d.contact.id);
   return (
     <>
-      {SHOW_CONTACT_ROLES.map((role) => {
+      {PEOPLE_ROLES.map((role) => {
         const list = contactsOf(contacts, role);
         if (list.length === 0) return null;
         return (

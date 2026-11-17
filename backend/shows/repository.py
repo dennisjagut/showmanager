@@ -9,8 +9,6 @@ SHOW_FIELDS = [
     "title",
     "status",
     "tour",
-    "venue",
-    "address",
     "fee",
     "guest_quota",
     "hotel",

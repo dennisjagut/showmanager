@@ -1094,7 +1094,7 @@ export interface components {
              * Role
              * @enum {string}
              */
-            role: "promoter" | "contact";
+            role: "venue" | "promoter" | "contact";
         };
         /**
          * Created
@@ -1514,10 +1514,6 @@ export interface components {
              * @enum {string}
              */
             status: "option" | "confirmed" | "cancelled";
-            /** Venue */
-            venue: string | null;
-            /** Address */
-            address: string | null;
             /** Fee */
             fee: string | null;
             /** Guestquota */
@@ -1546,7 +1542,7 @@ export interface components {
              * Role
              * @enum {string}
              */
-            role: "promoter" | "contact";
+            role: "venue" | "promoter" | "contact";
             details: components["schemas"]["ContactDetails"];
         };
         /**
@@ -1554,6 +1550,8 @@ export interface components {
          * @description All contacts of the show as they should be afterwards, by contact ID and in this order
          */
         ShowContactsIn: {
+            /** Venue */
+            venue?: number | null;
             /**
              * Promoters
              * @default []
@@ -1590,10 +1588,6 @@ export interface components {
             status: "option" | "confirmed" | "cancelled";
             /** Tour */
             tour?: string | null;
-            /** Venue */
-            venue?: string | null;
-            /** Address */
-            address?: string | null;
             /** Fee */
             fee?: string | null;
             /** Guestquota */
@@ -1630,6 +1624,7 @@ export interface components {
         /** ShowRow */
         ShowRow: {
             show: components["schemas"]["Show"];
+            venue: components["schemas"]["Contact"] | null;
             /** Showtime */
             showtime: string | null;
             /** Guestcount */

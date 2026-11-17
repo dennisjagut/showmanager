@@ -293,26 +293,32 @@
   "showContacts": {
     "title": "Kontakte",
     "roles": {
+      "venue": "Venue",
       "promoter": "Veranstalter",
       "contact": "Ansprechpersonen"
     },
     "add": {
+      "venue": "+ Venue",
       "promoter": "+ Veranstalter",
       "contact": "+ Ansprechperson"
     },
     "empty": {
+      "venue": "Noch keine Venue verknüpft.",
       "promoter": "Noch kein Veranstalter verknüpft.",
       "contact": "Noch keine Ansprechperson verknüpft."
     },
     "pick": {
+      "venue": "Venue auswählen",
       "promoter": "Veranstalter auswählen",
       "contact": "Ansprechpersonen auswählen"
     },
     "pickHint": "Nur Kontakte aus eurer Kontaktliste.",
-    "atPromoter": "Bei {names}",
-    "ofPromoter": "Beim Veranstalter",
+    "change": "Ändern",
+    "theVenue": "Die Venue",
+    "atOrganizations": "Bei {names}",
     "remove": "{name} von der Show entfernen",
     "roleAtShow": {
+      "venue": "Venue",
       "promoter": "Veranstalter",
       "contact": "Ansprechperson"
     }
@@ -409,13 +415,9 @@
     "status": "Status",
     "tour": "Tour / Reihe",
     "tourPlaceholder": "optional, z. B. Sommer 2027",
-    "venue": "Venue",
-    "venuePlaceholder": "Club, Festivalgelände, Bühne …",
-    "address": "Adresse",
-    "addressPlaceholder": "Straße, PLZ Ort",
     "deal": "Deal",
-    "contactsHint": "Veranstalter und Ansprechpersonen verknüpft ihr auf der Show-Seite, nur aus euren Kontakten.",
-    "contactsHintNew": "Veranstalter und Ansprechpersonen verknüpft ihr nach dem Anlegen auf der Show-Seite, nur aus euren Kontakten.",
+    "contactsHint": "Venue, Veranstalter und Ansprechpersonen verknüpft ihr auf der Show-Seite, nur aus euren Kontakten.",
+    "contactsHintNew": "Venue, Veranstalter und Ansprechpersonen verknüpft ihr nach dem Anlegen auf der Show-Seite, nur aus euren Kontakten.",
     "feePlaceholder": "z. B. 400 € + Catering + Fahrtkosten",
     "guestQuota": "Gästelistenplätze",
     "logistics": "Logistik",

@@ -121,6 +121,7 @@ def list_shows(view: str, tour: str) -> ShowList:
     rows = [
         ShowRow(
             show=d.show,
+            venue=next((c.details.contact for c in d.contacts if c.role == "venue"), None),
             showtime=next((p.time for p in d.schedule if SHOWTIME.search(p.item)), None),
             guest_count=guest_count(d.guests),
         )
@@ -189,16 +190,20 @@ def delete_show(show_id: int) -> None:
 def set_contacts(show_id: int, body: ShowContactsIn) -> ShowDetails | None:
     """
     Links contacts from the contact list to the show and returns it as saved. IDs of contacts that do not exist (any
-    more) are left out, and a contact listed twice in one role only counts once. None if the show does not exist.
+    more) are left out, a contact listed twice in one role only counts once, and only an organization can be the venue.
+    None if the show does not exist.
     """
     if not repository.find_by_id(show_id):
         return None
-    existing = {d.contact.id for d in contacts.all_details()}
+    kinds = {d.contact.id: d.contact.kind for d in contacts.all_details()}
 
     def known(ids: list[int]) -> list[int]:
-        return [i for n, i in enumerate(ids) if i in existing and i not in ids[:n]]
+        return [i for n, i in enumerate(ids) if i in kinds and i not in ids[:n]]
 
-    repository.save_contacts(show_id, {"promoter": known(body.promoters), "contact": known(body.contacts)})
+    venue = [body.venue] if body.venue is not None and kinds.get(body.venue) == "organization" else []
+    repository.save_contacts(
+        show_id, {"venue": venue, "promoter": known(body.promoters), "contact": known(body.contacts)}
+    )
     return show_details(show_id)
 
 

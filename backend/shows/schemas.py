@@ -3,6 +3,7 @@
 from pydantic import Field, model_validator
 
 from ..core.base import ApiModel, IsoDate, OptionalCount, OptionalId, OptionalText, RequiredText, Time
+from ..contacts.models import Contact
 from ..contacts.schemas import ContactDetails
 from ..masterdata.models import PackingList, PackingListCategory, PackingListItem
 from .models import Guest, PackingStage, ScheduleItem, Show, ShowContactRole, ShowStatus
@@ -44,12 +45,14 @@ class ShowDetails(ApiModel):
     guests: list[Guest]
     # None if the show has no packing list
     packing: ShowPacking | None
-    # First the promoters, then the people to talk to, each in their order
+    # First the venue, then the promoters and the people to talk to, each in their order
     contacts: list[ShowContact]
 
 
 class ShowRow(ApiModel):
     show: Show
+    # The organization from the contacts where the show takes place
+    venue: Contact | None
     # Time of the first schedule item that looks like the main show
     showtime: str | None
     guest_count: int
@@ -69,8 +72,6 @@ class ShowIn(ApiModel):
     title: RequiredText
     status: ShowStatus = "option"
     tour: OptionalText = None
-    venue: OptionalText = None
-    address: OptionalText = None
     fee: OptionalText = None
     guest_quota: OptionalCount = None
     hotel: OptionalText = None
@@ -102,6 +103,8 @@ class ContactShow(ApiModel):
 class ShowContactsIn(ApiModel):
     """All contacts of the show as they should be afterwards, by contact ID and in this order"""
 
+    # An organization; None: no venue yet
+    venue: int | None = None
     promoters: list[int] = Field(default=[], max_length=50)
     contacts: list[int] = Field(default=[], max_length=50)
 
