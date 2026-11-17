@@ -4,7 +4,15 @@ from typing import Annotated, Literal
 
 from pydantic import BeforeValidator, Field, model_validator
 
-from ..core.base import ApiModel, OptionalIsoDate, OptionalMonth, OptionalText, RequiredText, empty_to_none
+from ..core.base import (
+    ApiModel,
+    OptionalIsoDate,
+    OptionalMonth,
+    OptionalMonthDay,
+    OptionalText,
+    RequiredText,
+    empty_to_none,
+)
 from ..contacts.models import Contact
 from ..contacts.schemas import ContactDetails
 from .models import Application, ApplicationStatus, Festival, State
@@ -90,7 +98,7 @@ class FestivalIn(ApiModel):
     state: OptionalState = None
     month: OptionalMonth = None
     website: OptionalText = None
-    deadline: OptionalIsoDate = None
+    deadline: OptionalMonthDay = None
     notes: OptionalText = None
     active: bool = True
     # IDs from the contact list, in this order; unknown ones are left out

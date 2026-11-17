@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Checkbox, SelectField, TextAreaField, TextField } from "@/components/ui/Field";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { createFestival } from "@/features/applications/actions";
+import { DeadlineInput } from "@/features/applications/components/DeadlineInput";
 import { FestivalContactsField } from "@/features/applications/components/FestivalContactsField";
 import { useFestivalOptions } from "@/features/applications/options";
 import type { ContactDetails } from "@/lib/api/types";
@@ -34,7 +35,7 @@ export function FestivalForm({ allContacts }: { allContacts: ContactDetails[] })
       </div>
       <div className="grid grid-cols-2 gap-3">
         <SelectField label={t("month")} name="month" options={[none, ...options.months]} />
-        <TextField label={t("deadline")} name="deadline" type="date" hint={t("deadlineHint")} />
+        <DeadlineInput label={t("deadline")} hint={t("deadlineHint")} name="deadline" />
       </div>
       <TextField label={t("website")} name="website" type="url" placeholder="https://" />
       <FestivalContactsField

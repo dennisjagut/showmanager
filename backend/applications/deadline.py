@@ -15,16 +15,15 @@ DEFAULT_FESTIVAL_MONTH = 8
 
 def deadline_for_season(deadline: str | None, festival_month: int | None, season: int) -> Deadline | None:
     """
-    The deadline repeats every year: only day and month of the stored date count. If its month is after the festival
-    month, the year before the season is meant (30 September for a festival in August 2027 → 30.09.2026).
+    The deadline is day and month (MM-DD) and repeats every year. If its month is after the festival month, the year
+    before the season is meant (09-30 for a festival in August 2027 → 30.09.2026).
     """
     if not deadline:
         return None
-    stored = date.fromisoformat(deadline)
-    year = season if stored.month <= (festival_month or DEFAULT_FESTIVAL_MONTH) else season - 1
+    month, day = (int(part) for part in deadline.split("-"))
+    year = season if month <= (festival_month or DEFAULT_FESTIVAL_MONTH) else season - 1
     # 29 February only exists in leap years
-    day = min(stored.day, calendar.monthrange(year, stored.month)[1])
-    iso = date(year, stored.month, day).isoformat()
+    iso = date(year, month, min(day, calendar.monthrange(year, month)[1])).isoformat()
     return Deadline(date=iso, state=deadline_state(iso))
 
 

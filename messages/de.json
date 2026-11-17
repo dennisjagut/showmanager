@@ -180,6 +180,8 @@
     "month": "Festivalmonat",
     "deadline": "Deadline Bewerbung",
     "deadlineHint": "Gilt jedes Jahr am selben Tag.",
+    "deadlineDay": "Tag der Deadline",
+    "deadlineMonth": "Monat der Deadline",
     "deadlineYearly": "jedes Jahr am {date}",
     "none": "–",
     "website": "Website",

@@ -20,7 +20,7 @@ class Festival(ApiModel):
     # Month of the festival, 1 = January
     month: int | None
     website: str | None
-    # Application deadline as ISO date. It repeats every year, so for each season only day and month count.
+    # Application deadline as day and month (MM-DD), the same every year
     deadline: str | None
     notes: str | None
     # False for festivals that no longer exist

@@ -57,7 +57,10 @@ export default async function FestivalPage({ params, searchParams }: Props) {
   }
 
   const facts: Fact[] = [
-    { label: tf("deadline"), value: f.deadline && tf("deadlineYearly", { date: formatDayMonth(f.deadline, locale) }) },
+    {
+      label: tf("deadline"),
+      value: f.deadline && tf("deadlineYearly", { date: formatDayMonth(f.deadline, locale, "long") }),
+    },
     {
       label: tf("contacts"),
       value: data.contacts.length > 0 && <LinkedContacts contacts={data.contacts.map((c) => c.contact)} />,

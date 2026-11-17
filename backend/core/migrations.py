@@ -350,7 +350,7 @@ WHERE f.`contact` IS NOT NULL;""",
         "0010_festival_fixed_fields",
         [
             """-- Festival month, deadline and federal state were free text. From now on the month is a number (1 = January),
--- the deadline an ISO date that repeats every year and the state one of the 16 codes. Text that does not fit is kept
+-- the deadline day and month (MM-DD) that repeat every year and the state one of the 16 codes. Text that does not fit is kept
 -- in the notes, so nothing gets lost.
 CREATE TABLE `_month_names` (`number` integer NOT NULL, `name` text NOT NULL);""",
             """INSERT INTO `_month_names` (`number`, `name`) VALUES
@@ -378,17 +378,11 @@ UPDATE `festivals` SET
 		(SELECT `code` FROM `_state_names` WHERE `name` = lower(trim(`state`)) LIMIT 1));""",
             """-- "ab Juni" ("from June") names the start of the application period, not its end
 UPDATE `festivals` SET `deadline_month` = NULL WHERE lower(trim(`deadline`)) LIKE 'ab %';""",
-            """-- The last day of the month: "Oktober" and "bis Oktober" → 31 October, "vor Oktober" → 30 September.
--- The year is the one of the current season; a deadline after the festival month belongs to the year before.
+            """-- The last day of the month as MM-DD, without a year: "Oktober" and "bis Oktober" → 10-31, "vor Oktober" → 09-30.
+-- February always ends on the 28th here.
 UPDATE `festivals` SET `deadline_date` = (
-	SELECT date(printf('%04d-%02d-01', iif(m.target = 0, m.year - 1, m.year), iif(m.target = 0, 12, m.target)),
-		'+1 month', '-1 day')
-	FROM (
-		SELECT
-			`deadline_month` - iif(lower(trim(`deadline`)) LIKE 'vor %', 1, 0) AS target,
-			cast(strftime('%Y', 'now') AS integer) + iif(cast(strftime('%m', 'now') AS integer) >= 9, 1, 0)
-				- iif(`deadline_month` <= coalesce(`month_number`, 8), 0, 1) AS year
-	) m
+	SELECT strftime('%m-%d', date(printf('2001-%02d-01', iif(m.target = 0, 12, m.target)), '+1 month', '-1 day'))
+	FROM (SELECT `deadline_month` - iif(lower(trim(`deadline`)) LIKE 'vor %', 1, 0) AS target) m
 ) WHERE `deadline_month` IS NOT NULL;""",
             """-- Keep the old text in the notes where the new field cannot hold all of it
 UPDATE `festivals` SET `notes` = coalesce(`notes` || char(10), '') || 'Festivalmonat bisher: ' || `month`

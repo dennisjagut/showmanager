@@ -37,9 +37,15 @@ export function formatDate(iso: string | null | undefined, locale: string): stri
   return format(iso, locale, { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-// Day and month without the year, e.g. "30. September"
-export function formatDayMonth(iso: string, locale: string): string {
-  return format(iso, locale, { day: "numeric", month: "long" });
+// Day and month without the year, from an ISO date or MM-DD: "30.09." (short) or "30. September" (long)
+export function formatDayMonth(value: string, locale: string, style: "short" | "long" = "short"): string {
+  // 2000 is a leap year, so 02-29 works as well
+  const iso = value.length === 5 ? `2000-${value}` : value;
+  return format(
+    iso,
+    locale,
+    style === "long" ? { day: "numeric", month: "long" } : { day: "2-digit", month: "2-digit" },
+  );
 }
 
 // e.g. "Samstag, 12. Juni 2027"

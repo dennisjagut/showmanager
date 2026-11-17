@@ -12,6 +12,7 @@ import { SaveBar } from "@/components/ui/SaveBar";
 import { useDraft } from "@/components/ui/use-draft";
 import { saveFestival } from "@/features/applications/actions";
 import { Deadline } from "@/features/applications/components/Deadline";
+import { DeadlineInput } from "@/features/applications/components/DeadlineInput";
 import { FestivalContactsField } from "@/features/applications/components/FestivalContactsField";
 import {
   applicationKey,
@@ -240,7 +241,13 @@ export function FestivalEditor({
             </div>
             <div className="grid grid-cols-2 gap-3">
               <SelectField label={tf("month")} {...select("month", options.months)} />
-              <TextField label={tf("deadline")} type="date" hint={tf("deadlineHint")} {...field("deadline")} />
+              <DeadlineInput
+                label={tf("deadline")}
+                hint={tf("deadlineHint")}
+                value={draft.fields.deadline}
+                onChange={(deadline) => update({ ...draft, fields: { ...draft.fields, deadline } })}
+                changed={isFieldChanged(draft, saved, "deadline")}
+              />
             </div>
             <TextField label={tf("website")} type="url" placeholder="https://" {...field("website")} />
             <FestivalContactsField
