@@ -341,6 +341,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/shows/{show_id}/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Contacts
+         * @description Links promoters and people to talk to from the contact list; contacts that are missing are unlinked
+         */
+        put: operations["set_contacts_api_v1_shows__show_id__contacts_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contact_id}/shows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Shows Of Contact
+         * @description Shows a contact is linked to, newest first, with its role there
+         */
+        get: operations["shows_of_contact_api_v1_contacts__contact_id__shows_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/shows/{show_id}/packing-list": {
         parameters: {
             query?: never;
@@ -1045,6 +1085,18 @@ export interface components {
             links: components["schemas"]["ContactLinkIn"][];
         };
         /**
+         * ContactShow
+         * @description A show a contact is linked to, seen from the contact
+         */
+        ContactShow: {
+            show: components["schemas"]["Show"];
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "promoter" | "contact";
+        };
+        /**
          * Created
          * @description Answer when something new was created
          */
@@ -1466,12 +1518,6 @@ export interface components {
             venue: string | null;
             /** Address */
             address: string | null;
-            /** Contactname */
-            contactName: string | null;
-            /** Contactphone */
-            contactPhone: string | null;
-            /** Contactemail */
-            contactEmail: string | null;
             /** Fee */
             fee: string | null;
             /** Guestquota */
@@ -1491,6 +1537,34 @@ export interface components {
             /** Updatedat */
             updatedAt: string;
         };
+        /**
+         * ShowContact
+         * @description A contact from the contact list linked to a show
+         */
+        ShowContact: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "promoter" | "contact";
+            details: components["schemas"]["ContactDetails"];
+        };
+        /**
+         * ShowContactsIn
+         * @description All contacts of the show as they should be afterwards, by contact ID and in this order
+         */
+        ShowContactsIn: {
+            /**
+             * Promoters
+             * @default []
+             */
+            promoters: number[];
+            /**
+             * Contacts
+             * @default []
+             */
+            contacts: number[];
+        };
         /** ShowDetails */
         ShowDetails: {
             show: components["schemas"]["Show"];
@@ -1499,6 +1573,8 @@ export interface components {
             /** Guests */
             guests: components["schemas"]["Guest"][];
             packing: components["schemas"]["ShowPacking"] | null;
+            /** Contacts */
+            contacts: components["schemas"]["ShowContact"][];
         };
         /** ShowIn */
         ShowIn: {
@@ -1518,12 +1594,6 @@ export interface components {
             venue?: string | null;
             /** Address */
             address?: string | null;
-            /** Contactname */
-            contactName?: string | null;
-            /** Contactphone */
-            contactPhone?: string | null;
-            /** Contactemail */
-            contactEmail?: string | null;
             /** Fee */
             fee?: string | null;
             /** Guestquota */
@@ -2365,6 +2435,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_contacts_api_v1_shows__show_id__contacts_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                show_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShowContactsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShowDetails"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    shows_of_contact_api_v1_contacts__contact_id__shows_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactShow"][];
                 };
             };
             /** @description Validation Error */

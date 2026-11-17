@@ -10,7 +10,9 @@ import { SubmitButton } from "@/components/ui/SubmitButton";
 import { addGuest, deleteGuest, deleteScheduleItem, deleteShow } from "@/features/shows/actions";
 import { DateBlock } from "@/features/shows/components/DateBlock";
 import { RelativeDay } from "@/features/shows/components/RelativeDay";
-import { ContactInfo, LogisticsInfo } from "@/features/shows/components/Infos";
+import { LogisticsInfo } from "@/features/shows/components/Infos";
+import { ShowContactsCard } from "@/features/shows/components/ShowContactsCard";
+import { getContacts } from "@/features/contacts/api";
 import { getPackingLists } from "@/features/masterdata/api";
 import { PackingListCard } from "@/features/shows/components/PackingListCard";
 import { ScheduleInput } from "@/features/shows/components/ScheduleInput";
@@ -23,16 +25,17 @@ export const dynamic = "force-dynamic";
 
 export default async function ShowPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [data, templateList, packingLists, t, tc, ts, locale] = await Promise.all([
+  const [data, templateList, packingLists, contactList, t, tc, ts, locale] = await Promise.all([
     getShow(id),
     getTemplates(),
     getPackingLists(),
+    getContacts(),
     getTranslations("show"),
     getTranslations("common"),
     getTranslations("showStatus"),
     getLocale(),
   ]);
-  const { show: s, schedule, guests, packing } = data;
+  const { show: s, schedule, guests, packing, contacts } = data;
 
   const people = guestCount(guests);
   const mapUrl = mapsLink(s);
@@ -150,10 +153,11 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
         </div>
 
         <div className="space-y-6">
+          <ShowContactsCard showId={s.id} contacts={contacts} allContacts={contactList.rows} />
+
           <Card title={t("infos")} className="space-y-4">
-            <ContactInfo show={s} />
             <LogisticsInfo show={s} />
-            {!s.contactName && !s.fee && !s.travel && !s.hotel && !s.tech && !s.notes && (
+            {!s.fee && !s.travel && !s.hotel && !s.tech && !s.notes && (
               <p className="text-sm text-zinc-500">
                 {t("noInfos")}{" "}
                 <Link href={`/shows/${s.id}/edit`} className="link">

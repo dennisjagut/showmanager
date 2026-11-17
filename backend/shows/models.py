@@ -1,10 +1,15 @@
-"""Entities of the module, as they are stored in the tables shows, show_schedule, show_guests and schedule_templates."""
+"""Entities of the module, as they are stored in the tables shows, show_schedule, show_guests, show_contacts and
+schedule_templates."""
 
 from typing import Literal
 
 from ..core.base import ApiModel
 
 ShowStatus = Literal["option", "confirmed", "cancelled"]
+
+# What a linked contact is for a show: its promoter, or a person to talk to (on site, production, booking …)
+ShowContactRole = Literal["promoter", "contact"]
+SHOW_CONTACT_ROLES: list[ShowContactRole] = ["promoter", "contact"]
 
 # Packed for the trip to the show, or packed again after it
 PackingStage = Literal["packed", "repacked"]
@@ -20,9 +25,6 @@ class Show(ApiModel):
     status: ShowStatus
     venue: str | None
     address: str | None
-    contact_name: str | None
-    contact_phone: str | None
-    contact_email: str | None
     # Fee or deal as free text
     fee: str | None
     # Number of guest list spots the band is entitled to

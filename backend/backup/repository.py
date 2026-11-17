@@ -10,6 +10,7 @@ TABLES = [
     "show_guests",
     "schedule_templates",
     "show_packing_marks",
+    "show_contacts",
     "contacts",
     "contact_roles",
     "contact_affiliations",

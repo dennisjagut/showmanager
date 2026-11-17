@@ -1,7 +1,15 @@
 import { PDFDocument, type PDFFont, type PDFPage, rgb, StandardFonts } from "pdf-lib";
-import type { Guest, ScheduleItem, Show } from "@/lib/api/types";
+import type { Guest, ScheduleItem, Show, ShowContact } from "@/lib/api/types";
 import { formatLongDate } from "@/lib/dates";
-import { guestCount, type LogisticsField, logisticsBlocks, place } from "./infos";
+import {
+  SHOW_CONTACT_ROLES,
+  contactsOf,
+  guestCount,
+  type LogisticsField,
+  logisticsBlocks,
+  place,
+  positionAt,
+} from "./infos";
 
 // A4 in points
 const WIDTH = 595.28;
@@ -13,7 +21,7 @@ const BLACK = rgb(0.09, 0.09, 0.11);
 const GREY = rgb(0.45, 0.45, 0.5);
 const LINE = rgb(0.88, 0.88, 0.9);
 
-type Data = { show: Show; schedule: ScheduleItem[]; guests: Guest[] };
+type Data = { show: Show; schedule: ScheduleItem[]; guests: Guest[]; contacts: ShowContact[] };
 
 // Translated texts, so this module does not depend on the request
 export type DaysheetTexts = {
@@ -24,7 +32,8 @@ export type DaysheetTexts = {
   status: string | null;
   schedule: string;
   noSchedule: string;
-  contact: string;
+  // Headings of promoters and people to talk to
+  contacts: Record<ShowContact["role"], string>;
   logistics: Record<LogisticsField, string>;
   guestList: (people: number) => string;
   addedBy: (name: string) => string;
@@ -41,7 +50,10 @@ type TextOptions = {
 };
 
 /** Builds the daysheet as a PDF – independent of the browser's print dialog, so it also works on phones. */
-export async function daysheetPdf({ show, schedule, guests }: Data, texts: DaysheetTexts): Promise<Uint8Array> {
+export async function daysheetPdf(
+  { show, schedule, guests, contacts }: Data,
+  texts: DaysheetTexts,
+): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   pdf.setTitle(`${texts.title} ${show.title}`);
   pdf.setLanguage(texts.locale);
@@ -64,8 +76,14 @@ export async function daysheetPdf({ show, schedule, guests }: Data, texts: Daysh
   if (schedule.length === 0) w.text(texts.noSchedule, { color: GREY });
   for (const p of schedule) w.timeRow(p.time, p.item);
 
-  const contact = [show.contactName, show.contactPhone, show.contactEmail].filter(Boolean).join("\n");
-  const blocks: [string, string][] = contact ? [[texts.contact, contact]] : [];
+  const promoterIds = contactsOf(contacts, "promoter").map((d) => d.contact.id);
+  const blocks: [string, string][] = [];
+  for (const role of SHOW_CONTACT_ROLES) {
+    const people = contactsOf(contacts, role).map((d) =>
+      [d.contact.name, positionAt(d, promoterIds), d.contact.phone, d.contact.email].filter(Boolean).join("\n"),
+    );
+    if (people.length > 0) blocks.push([texts.contacts[role], people.join("\n\n")]);
+  }
   for (const [field, text] of logisticsBlocks(show)) blocks.push([texts.logistics[field], text]);
   for (const [title, content] of blocks) {
     w.heading(title);

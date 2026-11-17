@@ -258,4 +258,33 @@ CREATE TABLE `contact_affiliations` (
             """CREATE INDEX `contact_affiliations_organization` ON `contact_affiliations` (`organization_id`);""",
         ],
     ),
+    (
+        "0007_show_contacts",
+        [
+            """-- Contacts of a show, only from the contact list: its promoters and the people to talk to (role 'contact')
+CREATE TABLE `show_contacts` (
+	`show_id` integer NOT NULL,
+	`contact_id` integer NOT NULL,
+	`role` text NOT NULL,
+	`sort_order` integer DEFAULT 0 NOT NULL,
+	PRIMARY KEY (`show_id`, `contact_id`, `role`),
+	FOREIGN KEY (`show_id`) REFERENCES `shows`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`contact_id`) REFERENCES `contacts`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """CREATE INDEX `show_contacts_contact` ON `show_contacts` (`contact_id`);""",
+            """-- The free-text contact of the shows becomes a person in the contact list, the same one for identical entries.
+-- The columns contact_name, contact_phone and contact_email stay in the table but are no longer used.
+INSERT INTO `contacts` (`kind`, `name`, `email`, `phone`, `notes`)
+SELECT DISTINCT 'person', coalesce(`contact_name`, `contact_email`, `contact_phone`), `contact_email`, `contact_phone`,
+	'Aus den Angaben einer Show übernommen'
+FROM `shows`
+WHERE coalesce(`contact_name`, `contact_email`, `contact_phone`) IS NOT NULL;""",
+            """INSERT INTO `show_contacts` (`show_id`, `contact_id`, `role`, `sort_order`)
+SELECT s.`id`, c.`id`, 'contact', 10
+FROM `shows` s JOIN `contacts` c
+	ON c.`kind` = 'person' AND c.`notes` = 'Aus den Angaben einer Show übernommen'
+	AND c.`name` = coalesce(s.`contact_name`, s.`contact_email`, s.`contact_phone`)
+	AND c.`email` IS s.`contact_email` AND c.`phone` IS s.`contact_phone`;""",
+        ],
+    ),
 ]

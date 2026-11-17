@@ -1,7 +1,7 @@
 """Database access of the module: the SQL for shows, their schedule and guests, and the schedule templates."""
 
 from ..core import db
-from .models import Guest, PackingMarks, PackingStage, ScheduleItem, ScheduleTemplate, Show
+from .models import Guest, PackingMarks, PackingStage, ScheduleItem, ScheduleTemplate, Show, ShowContactRole
 from .schemas import TemplateIn
 
 SHOW_FIELDS = [
@@ -11,9 +11,6 @@ SHOW_FIELDS = [
     "tour",
     "venue",
     "address",
-    "contact_name",
-    "contact_phone",
-    "contact_email",
     "fee",
     "guest_quota",
     "hotel",
@@ -79,11 +76,12 @@ def drop_stale_marks(w: db.Writer, show_id: int) -> None:
 
 
 def delete(show_id: int) -> None:
-    """Deletes the show with its schedule, guest list and packing marks"""
+    """Deletes the show with its schedule, guest list, packing marks and links to contacts; the contacts stay"""
     with db.write() as w:
         w.execute("delete from show_packing_marks where show_id = ?", (show_id,))
         w.execute("delete from show_schedule where show_id = ?", (show_id,))
         w.execute("delete from show_guests where show_id = ?", (show_id,))
+        w.execute("delete from show_contacts where show_id = ?", (show_id,))
         w.execute("delete from shows where id = ?", (show_id,))
 
 
@@ -135,6 +133,40 @@ def insert_guest(show_id: int, name: str, plus_ones: int, added_by: str | None, 
 def delete_guest(show_id: int, guest_id: int) -> None:
     with db.write() as w:
         w.execute("delete from show_guests where id = ? and show_id = ?", (guest_id, show_id))
+
+
+# --- Contacts ----------------------------------------------------------------------------------------------------------
+
+
+def find_contact_links(show_id: int | None = None) -> list[tuple[int, int, ShowContactRole]]:
+    """(show_id, contact_id, role) of one show or of all shows, in their order within the role"""
+    if show_id is None:
+        rows = db.query("select * from show_contacts order by show_id, role, sort_order")
+    else:
+        rows = db.query("select * from show_contacts where show_id = ? order by role, sort_order", (show_id,))
+    return [(r["show_id"], r["contact_id"], r["role"]) for r in rows]
+
+
+def find_shows_of_contact(contact_id: int) -> list[tuple[Show, ShowContactRole]]:
+    """Shows the contact is linked to, newest first, with its role there"""
+    rows = db.query(
+        """select s.*, sc.role sc_role from shows s join show_contacts sc on sc.show_id = s.id
+           where sc.contact_id = ? order by s.date desc, s.id""",
+        (contact_id,),
+    )
+    return [(Show.model_validate(r), r["sc_role"]) for r in rows]
+
+
+def save_contacts(show_id: int, links: dict[ShowContactRole, list[int]]) -> None:
+    """Replaces all contacts of the show, in the given order per role"""
+    with db.write() as w:
+        w.execute("delete from show_contacts where show_id = ?", (show_id,))
+        for role, contact_ids in links.items():
+            for index, contact_id in enumerate(contact_ids):
+                w.execute(
+                    "insert into show_contacts (show_id, contact_id, role, sort_order) values (?, ?, ?, ?)",
+                    (show_id, contact_id, role, (index + 1) * 10),
+                )
 
 
 # --- Packing list ----------------------------------------------------------------------------------------------------

@@ -1,10 +1,11 @@
 """What the API receives and returns. The entities themselves are in models.py."""
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 
 from ..core.base import ApiModel, IsoDate, OptionalCount, OptionalId, OptionalText, RequiredText, Time
+from ..contacts.schemas import ContactDetails
 from ..masterdata.models import PackingList, PackingListCategory, PackingListItem
-from .models import Guest, PackingStage, ScheduleItem, Show, ShowStatus
+from .models import Guest, PackingStage, ScheduleItem, Show, ShowContactRole, ShowStatus
 
 
 class PackingItem(ApiModel):
@@ -28,6 +29,13 @@ class ShowPacking(ApiModel):
     groups: list[PackingGroup]
 
 
+class ShowContact(ApiModel):
+    """A contact from the contact list linked to a show"""
+
+    role: ShowContactRole
+    details: ContactDetails
+
+
 class ShowDetails(ApiModel):
     show: Show
     # In the order of the day
@@ -36,6 +44,8 @@ class ShowDetails(ApiModel):
     guests: list[Guest]
     # None if the show has no packing list
     packing: ShowPacking | None
+    # First the promoters, then the people to talk to, each in their order
+    contacts: list[ShowContact]
 
 
 class ShowRow(ApiModel):
@@ -61,9 +71,6 @@ class ShowIn(ApiModel):
     tour: OptionalText = None
     venue: OptionalText = None
     address: OptionalText = None
-    contact_name: OptionalText = None
-    contact_phone: OptionalText = None
-    contact_email: OptionalText = None
     fee: OptionalText = None
     guest_quota: OptionalCount = None
     hotel: OptionalText = None
@@ -83,6 +90,20 @@ class GuestIn(ApiModel):
     plus_ones: OptionalCount = None
     added_by: OptionalText = None
     note: OptionalText = None
+
+
+class ContactShow(ApiModel):
+    """A show a contact is linked to, seen from the contact"""
+
+    show: Show
+    role: ShowContactRole
+
+
+class ShowContactsIn(ApiModel):
+    """All contacts of the show as they should be afterwards, by contact ID and in this order"""
+
+    promoters: list[int] = Field(default=[], max_length=50)
+    contacts: list[int] = Field(default=[], max_length=50)
 
 
 class PackingListChoiceIn(ApiModel):

@@ -39,16 +39,21 @@ def _links(
     return sorted(links, key=lambda link: (link.contact.name.lower(), link.contact.id))
 
 
-def contact_list(filters: ContactFilters) -> ContactList:
-    """All contacts with roles and links. Search, kind and role filter; the counters show what each filter would give."""
+def all_details() -> list[ContactDetails]:
+    """All contacts by name with roles and links, e.g. for other modules that show contacts"""
     contacts = repository.find_all()
     roles = repository.find_roles()
     affiliations = repository.find_affiliations()
     by_id = {c.id: c for c in contacts}
-    rows = [
+    return [
         ContactDetails(contact=c, roles=_sorted_roles(roles.get(c.id)), links=_links(c, affiliations, by_id, roles))
         for c in contacts
     ]
+
+
+def contact_list(filters: ContactFilters) -> ContactList:
+    """All contacts with roles and links. Search, kind and role filter; the counters show what each filter would give."""
+    rows = all_details()
 
     found = [r for r in rows if _matches_search(r, filters.q)]
     kind = filters.kind if filters.kind in KINDS else None

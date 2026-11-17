@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -12,6 +12,9 @@ import { getContact, getContactOptions } from "@/features/contacts/api";
 import { PhoneLink } from "@/features/contacts/components/ContactChannels";
 import { ContactEditor } from "@/features/contacts/components/ContactEditor";
 import { CONTACT_KIND_ICON, CONTACT_ROLE_TONE, otherKind } from "@/features/contacts/kinds";
+import { getShowsOfContact } from "@/features/shows/api";
+import { SHOW_STATUS_TONE } from "@/features/shows/status";
+import { formatDate } from "@/lib/dates";
 import { mapsSearchUrl } from "@/lib/maps";
 import { param, type SearchParams } from "@/lib/search-params";
 
@@ -26,13 +29,17 @@ type Props = {
 export default async function ContactPage({ params, searchParams }: Props) {
   const { id } = await params;
   const sp = await searchParams;
-  const [details, t, tf, tk, tr, tc] = await Promise.all([
+  const [details, shows, t, tf, tk, tr, tc, tsc, ts, locale] = await Promise.all([
     getContact(id),
+    getShowsOfContact(id),
     getTranslations("contacts"),
     getTranslations("contactForm"),
     getTranslations("contactKind"),
     getTranslations("contactRole"),
     getTranslations("common"),
+    getTranslations("showContacts"),
+    getTranslations("showStatus"),
+    getLocale(),
   ]);
   const { contact: c, roles, links } = details;
   const readHref = `/contacts/${c.id}`;
@@ -139,6 +146,27 @@ export default async function ContactPage({ params, searchParams }: Props) {
             </Card>
           ) : (
             <p className="text-sm text-zinc-500">{t(`noLinks.${c.kind}`)}</p>
+          )}
+          <h2 className="pt-3 section-title">{t("shows")}</h2>
+          {shows.length > 0 ? (
+            <Card className="p-0">
+              <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {shows.map(({ show: s, role }) => (
+                  <li key={`${s.id}-${role}`} className="flex items-start gap-3 px-4 py-3 text-sm">
+                    <span className="w-24 shrink-0 text-zinc-500 tabular-nums">{formatDate(s.date, locale)}</span>
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/shows/${s.id}`} className="font-medium link">
+                        {s.title}
+                      </Link>
+                      <div className="text-zinc-500">{tsc(`roleAtShow.${role}`)}</div>
+                    </div>
+                    {s.status !== "confirmed" && <Badge tone={SHOW_STATUS_TONE[s.status]}>{ts(s.status)}</Badge>}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : (
+            <p className="text-sm text-zinc-500">{t("noShows")}</p>
           )}
           <ActionButton
             action={deleteContact}

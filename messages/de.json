@@ -30,6 +30,7 @@
     "saveError": "Nicht gespeichert. Bitte die Eingaben prüfen und nochmal versuchen.",
     "saveShortcut": "Strg + S oder ⌘ + S",
     "cancel": "Abbrechen",
+    "close": "Schließen",
     "nameRequired": "Bitte einen Namen eingeben."
   },
   "errors": {
@@ -220,9 +221,8 @@
         "status": "Status",
         "venue": "Venue",
         "address": "Adresse",
-        "contact": "Kontakt",
-        "phone": "Telefon",
-        "email": "E-Mail",
+        "promoters": "Veranstalter",
+        "contacts": "Ansprechpersonen",
         "fee": "Gage / Deal",
         "guestQuota": "Gästeliste-Kontingent",
         "guests": "Gäste (Personen)",
@@ -284,12 +284,38 @@
     "cancelled": "Abgesagt"
   },
   "showInfo": {
-    "contact": "Veranstalter / Kontakt",
     "fee": "Gage / Deal",
     "travel": "Anreise",
     "hotel": "Hotel / Übernachtung",
     "tech": "Technik & Backline",
     "notes": "Sonstige Hinweise"
+  },
+  "showContacts": {
+    "title": "Kontakte",
+    "roles": {
+      "promoter": "Veranstalter",
+      "contact": "Ansprechpersonen"
+    },
+    "add": {
+      "promoter": "+ Veranstalter",
+      "contact": "+ Ansprechperson"
+    },
+    "empty": {
+      "promoter": "Noch kein Veranstalter verknüpft.",
+      "contact": "Noch keine Ansprechperson verknüpft."
+    },
+    "pick": {
+      "promoter": "Veranstalter auswählen",
+      "contact": "Ansprechpersonen auswählen"
+    },
+    "pickHint": "Nur Kontakte aus eurer Kontaktliste.",
+    "atPromoter": "Bei {names}",
+    "ofPromoter": "Beim Veranstalter",
+    "remove": "{name} von der Show entfernen",
+    "roleAtShow": {
+      "promoter": "Veranstalter",
+      "contact": "Ansprechperson"
+    }
   },
   "shows": {
     "title": "Shows",
@@ -387,10 +413,9 @@
     "venuePlaceholder": "Club, Festivalgelände, Bühne …",
     "address": "Adresse",
     "addressPlaceholder": "Straße, PLZ Ort",
-    "promoter": "Veranstalter & Deal",
-    "contactName": "Ansprechpartner",
-    "contactPhone": "Telefon",
-    "contactEmail": "E-Mail",
+    "deal": "Deal",
+    "contactsHint": "Veranstalter und Ansprechpersonen verknüpft ihr auf der Show-Seite, nur aus euren Kontakten.",
+    "contactsHintNew": "Veranstalter und Ansprechpersonen verknüpft ihr nach dem Anlegen auf der Show-Seite, nur aus euren Kontakten.",
     "feePlaceholder": "z. B. 400 € + Catering + Fahrtkosten",
     "guestQuota": "Gästelistenplätze",
     "logistics": "Logistik",
@@ -722,7 +747,9 @@
       "person": "Person löschen",
       "organization": "Organisation löschen"
     },
-    "deleteConfirm": "„{name}“ löschen? Verknüpfte Personen und Organisationen bleiben erhalten, nur die Verknüpfung fällt weg."
+    "deleteConfirm": "„{name}“ löschen? Verknüpfte Personen, Organisationen und Shows bleiben erhalten, nur die Verknüpfung fällt weg.",
+    "shows": "Shows",
+    "noShows": "Noch mit keiner Show verknüpft."
   },
   "contactForm": {
     "kind": "Art",
@@ -745,5 +772,18 @@
       "person": "z. B. am besten per Signal erreichbar, isst vegan",
       "organization": "z. B. Kapazität, Bühnenmaße, Ladezone, Deal-Konditionen"
     }
+  },
+  "contactPicker": {
+    "search": "Suche",
+    "searchPlaceholder": "Name, E-Mail, Ort, Organisation …",
+    "role": "Rolle",
+    "allRoles": "Alle Rollen",
+    "allContacts": "Alle Kontakte",
+    "selected": "{count, plural, =0 {Nichts ausgewählt} one {# ausgewählt} other {# ausgewählt}}",
+    "confirm": "Übernehmen",
+    "noResults": "Keine Kontakte für diese Suche und Filter.",
+    "empty": "Noch keine Kontakte.",
+    "missing": "Fehlt jemand?",
+    "createNew": "In den Kontakten anlegen ↗"
   }
 }

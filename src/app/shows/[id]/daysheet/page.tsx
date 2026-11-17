@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { BackLink, Page } from "@/components/ui/Page";
-import { ContactInfo, LogisticsInfo } from "@/features/shows/components/Infos";
+import { ContactsInfo, LogisticsInfo } from "@/features/shows/components/Infos";
 import { PdfButton } from "@/features/shows/components/PdfButton";
 import { PrintButton } from "@/features/shows/components/PrintButton";
 import { formatLongDate } from "@/lib/dates";
@@ -72,7 +72,7 @@ export default async function Daysheet({ params }: { params: Promise<{ id: strin
         </section>
 
         <section className="grid gap-4 sm:grid-cols-2 print:grid-cols-2">
-          <ContactInfo show={s} />
+          <ContactsInfo contacts={data.contacts} />
           <LogisticsInfo show={s} />
         </section>
 

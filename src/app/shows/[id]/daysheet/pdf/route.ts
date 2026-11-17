@@ -19,10 +19,11 @@ function filename(text: string): string {
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [data, t, ti, ts, locale] = await Promise.all([
+  const [data, t, ti, tsc, ts, locale] = await Promise.all([
     getShow(id),
     getTranslations("show"),
     getTranslations("showInfo"),
+    getTranslations("showContacts"),
     getTranslations("showStatus"),
     getLocale(),
   ]);
@@ -33,7 +34,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     status: data.show.status === "confirmed" ? null : ts(data.show.status),
     schedule: t("daysheetSchedule"),
     noSchedule: t("noSchedule"),
-    contact: ti("contact"),
+    contacts: { promoter: tsc("roles.promoter"), contact: tsc("roles.contact") },
     logistics: Object.fromEntries(LOGISTICS_FIELDS.map((f) => [f, ti(f)])) as Record<
       (typeof LOGISTICS_FIELDS)[number],
       string

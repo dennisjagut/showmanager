@@ -2,19 +2,24 @@
 
 import re
 
+from ..contacts import service as contacts
+from ..contacts.schemas import ContactDetails
 from ..core.dates import today_iso
 from ..masterdata import repository as masterdata
 from ..masterdata.models import PackingList, PackingListCategory, PackingListItem
 from ..masterdata.service import group_items
 from . import repository
-from .models import Guest, PackingMarks, ScheduleItem, ScheduleTemplate, Show
+from .models import SHOW_CONTACT_ROLES, Guest, PackingMarks, ScheduleItem, ScheduleTemplate, Show, ShowContactRole
 from .schemas import (
+    ContactShow,
     GuestIn,
     PackingListChoiceIn,
     PackingMarkIn,
     PackingGroup,
     PackingItem,
     ScheduleItemIn,
+    ShowContact,
+    ShowContactsIn,
     ShowDetails,
     ShowIn,
     ShowList,
@@ -73,8 +78,26 @@ def packing(
     )
 
 
+def show_contacts(
+    show_id: int, links: list[tuple[int, int, ShowContactRole]], details: dict[int, ContactDetails]
+) -> list[ShowContact]:
+    """The contacts of one show: promoters first, then the people to talk to, each in their order"""
+    return [
+        ShowContact(role=role, details=details[contact_id])
+        for role in SHOW_CONTACT_ROLES
+        for s, contact_id, r in links
+        if s == show_id and r == role and contact_id in details
+    ]
+
+
+def contact_details() -> dict[int, ContactDetails]:
+    return {d.contact.id: d for d in contacts.all_details()}
+
+
 def all_show_details() -> list[ShowDetails]:
-    """All shows by date with schedule, guest list and packing list"""
+    """All shows by date with schedule, guest list, packing list and contacts"""
+    links = repository.find_contact_links()
+    details = contact_details() if links else {}
     schedule = repository.find_schedule()
     guests = repository.find_guests()
     lists = {p.id: p for p in masterdata.find_packing_lists()}
@@ -87,6 +110,7 @@ def all_show_details() -> list[ShowDetails]:
             schedule=by_time([p for p in schedule if p.show_id == show.id]),
             guests=[g for g in guests if g.show_id == show.id],
             packing=packing(show, lists, categories, items, marks.get(show.id, PackingMarks())),
+            contacts=show_contacts(show.id, links, details),
         )
         for show in repository.find_all()
     ]
@@ -119,6 +143,7 @@ def show_details(show_id: int) -> ShowDetails | None:
     if not show:
         return None
     packing_list = masterdata.find_packing_list(show.packing_list_id) if show.packing_list_id else None
+    links = repository.find_contact_links(show_id)
     return ShowDetails(
         show=show,
         schedule=by_time(repository.find_schedule(show_id)),
@@ -130,6 +155,7 @@ def show_details(show_id: int) -> ShowDetails | None:
             masterdata.find_items(packing_list.id) if packing_list else [],
             repository.find_marks(show_id).get(show_id, PackingMarks()),
         ),
+        contacts=show_contacts(show_id, links, contact_details() if links else {}),
     )
 
 
@@ -155,6 +181,30 @@ def update_show(show_id: int, body: ShowIn) -> None:
 
 def delete_show(show_id: int) -> None:
     repository.delete(show_id)
+
+
+# --- Contacts --------------------------------------------------------------------------------------------------------
+
+
+def set_contacts(show_id: int, body: ShowContactsIn) -> ShowDetails | None:
+    """
+    Links contacts from the contact list to the show and returns it as saved. IDs of contacts that do not exist (any
+    more) are left out, and a contact listed twice in one role only counts once. None if the show does not exist.
+    """
+    if not repository.find_by_id(show_id):
+        return None
+    existing = {d.contact.id for d in contacts.all_details()}
+
+    def known(ids: list[int]) -> list[int]:
+        return [i for n, i in enumerate(ids) if i in existing and i not in ids[:n]]
+
+    repository.save_contacts(show_id, {"promoter": known(body.promoters), "contact": known(body.contacts)})
+    return show_details(show_id)
+
+
+def shows_of_contact(contact_id: int) -> list[ContactShow]:
+    """Shows the contact is linked to, newest first"""
+    return [ContactShow(show=show, role=role) for show, role in repository.find_shows_of_contact(contact_id)]
 
 
 # --- Running order ---------------------------------------------------------------------------------------------------

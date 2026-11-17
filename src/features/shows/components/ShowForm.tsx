@@ -78,12 +78,8 @@ export function ShowForm({
       </fieldset>
 
       <fieldset className="space-y-3">
-        <legend className="mb-2 section-title">{t("promoter")}</legend>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <TextField label={t("contactName")} name="contactName" defaultValue={value("contactName")} />
-          <TextField label={t("contactPhone")} name="contactPhone" type="tel" defaultValue={value("contactPhone")} />
-          <TextField label={t("contactEmail")} name="contactEmail" type="email" defaultValue={value("contactEmail")} />
-        </div>
+        <legend className="mb-2 section-title">{t("deal")}</legend>
+        <p className="text-sm text-zinc-500">{t(show ? "contactsHint" : "contactsHintNew")}</p>
         <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
           <TextField label={ti("fee")} name="fee" defaultValue={value("fee")} placeholder={t("feePlaceholder")} />
           <TextField
