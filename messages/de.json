@@ -658,6 +658,7 @@
     "promoter": "Veranstalter",
     "venue": "Location",
     "festival": "Festival",
+    "band": "Band",
     "booking": "Booking",
     "management": "Management",
     "label": "Label",
@@ -669,6 +670,7 @@
     "promoter": "Veranstaltet Shows und bucht Bands",
     "venue": "Club, Halle oder Bühne, in der gespielt wird",
     "festival": "Festival, bei dem man sich bewirbt oder spielt",
+    "band": "Andere Band oder Künstler:in, z. B. Support oder Co-Headliner. Veranstaltet sie selbst, zusätzlich „Veranstalter“ wählen.",
     "booking": "Bookingagentur oder Booker:in",
     "management": "Management von Bands oder Künstler:innen",
     "label": "Plattenlabel oder Vertrieb",
@@ -678,7 +680,7 @@
   },
   "contacts": {
     "title": "Kontakte",
-    "intro": "Personen und Organisationen, mit denen ihr immer wieder zu tun habt: Veranstalter, Locations, Bookingagenturen und alle anderen. Einmal hier pflegen, später bei Shows und Festivalbewerbungen wiederverwenden.",
+    "intro": "Personen und Organisationen, mit denen ihr immer wieder zu tun habt: Veranstalter, Locations, Bookingagenturen, andere Bands und alle anderen. Einmal hier pflegen, dann bei Shows und später bei Festivalbewerbungen wiederverwenden.",
     "exportCsv": "CSV exportieren",
     "newPerson": "+ Person",
     "newOrganization": "+ Organisation",
@@ -704,7 +706,7 @@
     "roles": "Rollen",
     "rolesHint": {
       "person": "Was die Person selbst für euch ist, z. B. freie:r Booker:in oder Tontechniker:in. Für wen sie arbeitet, kommt unter Organisation.",
-      "organization": "Mehrere möglich, z. B. Location und Veranstalter bei einem Club, der selbst bucht."
+      "organization": "Mehrere möglich, z. B. Location und Veranstalter bei einem Club, der selbst bucht, oder Band und Veranstalter bei einer Band, die selbst Shows organisiert."
     },
     "links": {
       "person": "Organisationen",

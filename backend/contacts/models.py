@@ -8,11 +8,16 @@ ContactKind = Literal["person", "organization"]
 KINDS: list[ContactKind] = ["person", "organization"]
 
 # What a contact is for the band. A contact can have several roles, e.g. a club that is venue and promoter.
-ContactRole = Literal["promoter", "venue", "festival", "booking", "management", "label", "media", "service", "other"]
-ROLES: list[ContactRole] = ["promoter", "venue", "festival", "booking", "management", "label", "media", "service", "other"]
+ContactRole = Literal[
+    "promoter", "venue", "festival", "band", "booking", "management", "label", "media", "service", "other"
+]
+ROLES: list[ContactRole] = [
+    "promoter", "venue", "festival", "band", "booking", "management", "label", "media", "service", "other"
+]
 
-# Roles only an organization can have: a person is not a venue, but can be its booker (affiliation with a position)
-ORGANIZATION_ROLES: set[ContactRole] = {"venue", "festival", "label"}
+# Roles only an organization can have: a person is not a venue, but can be its booker (affiliation with a position).
+# A band is an organization too, its members are people linked to it; a band that books shows also gets "promoter".
+ORGANIZATION_ROLES: set[ContactRole] = {"venue", "festival", "band", "label"}
 
 
 def roles_for(kind: ContactKind) -> list[ContactRole]:

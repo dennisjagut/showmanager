@@ -16,6 +16,7 @@ export const CONTACT_ROLES = [
   "promoter",
   "venue",
   "festival",
+  "band",
   "booking",
   "management",
   "label",
@@ -24,8 +25,9 @@ export const CONTACT_ROLES = [
   "other",
 ] as const satisfies readonly ContactRole[];
 
-// Roles only an organization can have: a person is not a venue, but can be its booker (linked with a position)
-const ORGANIZATION_ROLES: readonly ContactRole[] = ["venue", "festival", "label"];
+// Roles only an organization can have: a person is not a venue, but can be its booker (linked with a position). A band
+// is an organization too, its members are people linked to it; a band that books shows also gets "promoter".
+const ORGANIZATION_ROLES: readonly ContactRole[] = ["venue", "festival", "band", "label"];
 
 export function rolesFor(kind: ContactKind): ContactRole[] {
   return CONTACT_ROLES.filter((r) => kind === "organization" || !ORGANIZATION_ROLES.includes(r));
@@ -40,6 +42,7 @@ export const CONTACT_ROLE_TONE: Record<ContactRole, Tone> = {
   promoter: "success",
   venue: "info",
   festival: "warning",
+  band: "neutral",
   booking: "danger",
   management: "neutral",
   label: "neutral",

@@ -964,7 +964,7 @@ export interface components {
         ContactDetails: {
             contact: components["schemas"]["Contact"];
             /** Roles */
-            roles: ("promoter" | "venue" | "festival" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+            roles: ("promoter" | "venue" | "festival" | "band" | "booking" | "management" | "label" | "media" | "service" | "other")[];
             /** Links */
             links: components["schemas"]["ContactLink"][];
         };
@@ -991,7 +991,7 @@ export interface components {
              * Roles
              * @default []
              */
-            roles: ("promoter" | "venue" | "festival" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+            roles: ("promoter" | "venue" | "festival" | "band" | "booking" | "management" | "label" | "media" | "service" | "other")[];
             /**
              * Links
              * @default []
@@ -1052,7 +1052,7 @@ export interface components {
             /** Name */
             name: string;
             /** Roles */
-            roles: ("promoter" | "venue" | "festival" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+            roles: ("promoter" | "venue" | "festival" | "band" | "booking" | "management" | "label" | "media" | "service" | "other")[];
         };
         /**
          * ContactSaveIn
@@ -1077,7 +1077,7 @@ export interface components {
              * Roles
              * @default []
              */
-            roles: ("promoter" | "venue" | "festival" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+            roles: ("promoter" | "venue" | "festival" | "band" | "booking" | "management" | "label" | "media" | "service" | "other")[];
             /**
              * Links
              * @default []
