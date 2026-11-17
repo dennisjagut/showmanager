@@ -2,9 +2,11 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Card } from "@/components/ui/Card";
+import { SelectField } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
-import { setPackingMark } from "@/features/shows/actions";
-import type { ShowPacking } from "@/lib/api/types";
+import { SubmitButton } from "@/components/ui/SubmitButton";
+import { setPackingList, setPackingMark } from "@/features/shows/actions";
+import type { PackingListSummary, ShowPacking } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
 
 type Group = ShowPacking["groups"][number];
@@ -74,21 +76,73 @@ function PackingItems({ showId, items }: { showId: number; items: Entry[] }) {
   );
 }
 
+// Quick action on the show page: picks one of the packing lists from the master data, without the edit form
+// "Keine" removes it again. When items are already checked off, changing the list asks first, because the marks of
+// items that are not on the new list are dropped.
+function PackingListPicker({
+  showId,
+  packingLists,
+  current,
+  marked = false,
+}: {
+  showId: number;
+  packingLists: PackingListSummary[];
+  current?: number;
+  marked?: boolean;
+}) {
+  const t = useTranslations("show");
+  const tf = useTranslations("showForm");
+
+  if (packingLists.length === 0 && current === undefined) {
+    return (
+      <p className="text-sm text-zinc-500">
+        {t("noPackingLists")}{" "}
+        <Link href="/masterdata/packing-lists" className="link">
+          {t("createPackingList")}
+        </Link>
+      </p>
+    );
+  }
+
+  return (
+    <form action={setPackingList} className="flex flex-wrap items-end gap-2">
+      <input type="hidden" name="showId" value={showId} />
+      <SelectField
+        label={t("choosePackingList")}
+        name="packingListId"
+        defaultValue={current ?? ""}
+        className="min-w-40 flex-1"
+        options={[
+          { value: "", label: tf("noPackingList") },
+          ...packingLists.map((p) => ({ value: p.packingList.id, label: p.packingList.name })),
+        ]}
+      />
+      <SubmitButton className="btn-secondary" confirm={marked ? t("changePackingListConfirm") : undefined}>
+        {t("usePackingList")}
+      </SubmitButton>
+    </form>
+  );
+}
+
 // The show's packing list from the master data, by category. Each item is checked off twice: when packing for the
 // trip to the show, and when packing again after it.
-export function PackingListCard({ showId, packing }: { showId: number; packing: ShowPacking | null }) {
+export function PackingListCard({
+  showId,
+  packing,
+  packingLists,
+}: {
+  showId: number;
+  packing: ShowPacking | null;
+  packingLists: PackingListSummary[];
+}) {
   const t = useTranslations("show");
   const tp = useTranslations("packingLists");
 
   if (!packing) {
     return (
       <Card title={t("packingList")}>
-        <p className="text-sm text-zinc-500">
-          {t("noPackingList")}{" "}
-          <Link href={`/shows/${showId}/edit`} className="link">
-            {t("choosePackingList")}
-          </Link>
-        </p>
+        <p className="text-sm text-zinc-500">{t("noPackingList")}</p>
+        <PackingListPicker showId={showId} packingLists={packingLists} />
       </Card>
     );
   }
@@ -146,6 +200,14 @@ export function PackingListCard({ showId, packing }: { showId: number; packing: 
       <Link href={`/masterdata/packing-lists/${list.id}`} className="block text-sm link">
         {t("editPackingList")}
       </Link>
+      <div className="border-t border-zinc-200 pt-3 dark:border-zinc-700">
+        <PackingListPicker
+          showId={showId}
+          packingLists={packingLists}
+          current={list.id}
+          marked={total.packed + total.repacked > 0}
+        />
+      </div>
     </Card>
   );
 }

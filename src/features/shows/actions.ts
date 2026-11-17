@@ -57,6 +57,13 @@ export async function deleteGuest(formData: FormData) {
   refresh(showId);
 }
 
+// Picks the show's packing list right on the show page, without the edit form
+export async function setPackingList(formData: FormData) {
+  const showId = idOf(formData.get("showId"));
+  await api.put(`/shows/${showId}/packing-list`, formBody(formData, { omit: ["showId"] }));
+  refresh(showId);
+}
+
 // Checks an item of the show's packing list off (or not): stage "packed" before the trip, "repacked" after the show
 export async function setPackingMark(formData: FormData) {
   const showId = idOf(formData.get("showId"));

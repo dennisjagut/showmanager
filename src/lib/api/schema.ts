@@ -341,6 +341,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/shows/{show_id}/packing-list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Packing List
+         * @description Picks the show's packing list without touching the rest of the show
+         */
+        put: operations["set_packing_list_api_v1_shows__show_id__packing_list_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/shows/{show_id}/packing/{item_id}": {
         parameters: {
             query?: never;
@@ -1080,6 +1100,11 @@ export interface components {
              * @default []
              */
             items: components["schemas"]["PackingListItemIn"][];
+        };
+        /** PackingListChoiceIn */
+        PackingListChoiceIn: {
+            /** Packinglistid */
+            packingListId?: number | null;
         };
         /** PackingListDetails */
         PackingListDetails: {
@@ -2114,6 +2139,41 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_packing_list_api_v1_shows__show_id__packing_list_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                show_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PackingListChoiceIn"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

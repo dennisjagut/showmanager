@@ -10,6 +10,7 @@ from . import repository
 from .models import Guest, PackingMarks, ScheduleItem, ScheduleTemplate, Show
 from .schemas import (
     GuestIn,
+    PackingListChoiceIn,
     PackingMarkIn,
     PackingGroup,
     PackingItem,
@@ -199,6 +200,14 @@ def delete_guest(show_id: int, guest_id: int) -> None:
 
 
 # --- Packing list ----------------------------------------------------------------------------------------------------
+
+
+def set_packing_list(show_id: int, body: PackingListChoiceIn) -> None:
+    """A packing list that does not exist (any more) is not saved"""
+    packing_list_id = body.packing_list_id
+    if packing_list_id and not masterdata.find_packing_list(packing_list_id):
+        packing_list_id = None
+    repository.set_packing_list(show_id, packing_list_id)
 
 
 def set_mark(show_id: int, item_id: int, body: PackingMarkIn) -> None:

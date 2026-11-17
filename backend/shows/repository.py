@@ -55,12 +55,27 @@ def update(show_id: int, values: dict[str, object]) -> None:
             f"update shows set {', '.join(f'{k} = ?' for k in SHOW_FIELDS)}, updated_at = datetime('now') where id = ?",
             [*(values[k] for k in SHOW_FIELDS), show_id],
         )
+        drop_stale_marks(w, show_id)
+
+
+def set_packing_list(show_id: int, packing_list_id: int | None) -> None:
+    """Marks for items that are not on the new packing list are dropped"""
+    with db.write() as w:
         w.execute(
-            """delete from show_packing_marks where show_id = ? and item_id not in
-               (select i.id from packing_list_items i join shows s on s.packing_list_id = i.packing_list_id
-                where s.id = ?)""",
-            (show_id, show_id),
+            "update shows set packing_list_id = ?, updated_at = datetime('now') where id = ?",
+            (packing_list_id, show_id),
         )
+        drop_stale_marks(w, show_id)
+
+
+def drop_stale_marks(w: db.Writer, show_id: int) -> None:
+    """Deletes the marks for items that are not on the show's packing list (any more)"""
+    w.execute(
+        """delete from show_packing_marks where show_id = ? and item_id not in
+           (select i.id from packing_list_items i join shows s on s.packing_list_id = i.packing_list_id
+            where s.id = ?)""",
+        (show_id, show_id),
+    )
 
 
 def delete(show_id: int) -> None:

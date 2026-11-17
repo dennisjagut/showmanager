@@ -85,6 +85,11 @@ class GuestIn(ApiModel):
     note: OptionalText = None
 
 
+class PackingListChoiceIn(ApiModel):
+    # None removes the packing list from the show
+    packing_list_id: OptionalId = None
+
+
 class PackingMarkIn(ApiModel):
     stage: PackingStage
     done: bool

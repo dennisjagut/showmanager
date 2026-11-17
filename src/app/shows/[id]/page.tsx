@@ -11,6 +11,7 @@ import { addGuest, deleteGuest, deleteScheduleItem, deleteShow } from "@/feature
 import { DateBlock } from "@/features/shows/components/DateBlock";
 import { RelativeDay } from "@/features/shows/components/RelativeDay";
 import { ContactInfo, LogisticsInfo } from "@/features/shows/components/Infos";
+import { getPackingLists } from "@/features/masterdata/api";
 import { PackingListCard } from "@/features/shows/components/PackingListCard";
 import { ScheduleInput } from "@/features/shows/components/ScheduleInput";
 import { formatLongDate } from "@/lib/dates";
@@ -22,9 +23,10 @@ export const dynamic = "force-dynamic";
 
 export default async function ShowPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [data, templateList, t, tc, ts, locale] = await Promise.all([
+  const [data, templateList, packingLists, t, tc, ts, locale] = await Promise.all([
     getShow(id),
     getTemplates(),
+    getPackingLists(),
     getTranslations("show"),
     getTranslations("common"),
     getTranslations("showStatus"),
@@ -161,7 +163,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
             )}
           </Card>
 
-          <PackingListCard showId={s.id} packing={packing} />
+          <PackingListCard showId={s.id} packing={packing} packingLists={packingLists} />
         </div>
       </div>
 

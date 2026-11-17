@@ -5,7 +5,16 @@ from fastapi import APIRouter, HTTPException
 from ..core.base import Created
 from . import service
 from .models import ScheduleTemplate
-from .schemas import GuestIn, PackingMarkIn, ScheduleItemIn, ShowDetails, ShowIn, ShowList, TemplatesSaveIn
+from .schemas import (
+    GuestIn,
+    PackingListChoiceIn,
+    PackingMarkIn,
+    ScheduleItemIn,
+    ShowDetails,
+    ShowIn,
+    ShowList,
+    TemplatesSaveIn,
+)
 
 router = APIRouter(tags=["shows"])
 
@@ -68,6 +77,12 @@ def add_guest(show_id: int, body: GuestIn) -> None:
 @router.delete("/shows/{show_id}/guests/{guest_id}")
 def delete_guest(show_id: int, guest_id: int) -> None:
     service.delete_guest(show_id, guest_id)
+
+
+@router.put("/shows/{show_id}/packing-list")
+def set_packing_list(show_id: int, body: PackingListChoiceIn) -> None:
+    """Picks the show's packing list without touching the rest of the show"""
+    service.set_packing_list(show_id, body)
 
 
 @router.put("/shows/{show_id}/packing/{item_id}")
