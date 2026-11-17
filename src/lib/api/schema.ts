@@ -1141,8 +1141,6 @@ export interface components {
             website: string | null;
             /** Deadline */
             deadline: string | null;
-            /** Contact */
-            contact: string | null;
             /** Notes */
             notes: string | null;
             /** Active */
@@ -1158,6 +1156,8 @@ export interface components {
             /** Applications */
             applications: components["schemas"]["ApplicationWithDeadline"][];
             seasons: components["schemas"]["Seasons"];
+            /** Contacts */
+            contacts: components["schemas"]["ContactDetails"][];
         };
         /** FestivalIn */
         FestivalIn: {
@@ -1173,8 +1173,6 @@ export interface components {
             website?: string | null;
             /** Deadline */
             deadline?: string | null;
-            /** Contact */
-            contact?: string | null;
             /** Notes */
             notes?: string | null;
             /**
@@ -1182,6 +1180,11 @@ export interface components {
              * @default true
              */
             active: boolean;
+            /**
+             * Contacts
+             * @default []
+             */
+            contacts: number[];
         };
         /** FestivalList */
         FestivalList: {
@@ -1194,6 +1197,8 @@ export interface components {
         FestivalRow: {
             festival: components["schemas"]["Festival"];
             application: components["schemas"]["Application"] | null;
+            /** Contacts */
+            contacts: components["schemas"]["Contact"][];
         };
         /**
          * FestivalSaveIn
@@ -1212,8 +1217,6 @@ export interface components {
             website?: string | null;
             /** Deadline */
             deadline?: string | null;
-            /** Contact */
-            contact?: string | null;
             /** Notes */
             notes?: string | null;
             /**
@@ -1221,6 +1224,11 @@ export interface components {
              * @default true
              */
             active: boolean;
+            /**
+             * Contacts
+             * @default []
+             */
+            contacts: number[];
             /** Applications */
             applications: components["schemas"]["ApplicationIn"][];
         };
@@ -1303,6 +1311,8 @@ export interface components {
         OverviewRow: {
             festival: components["schemas"]["Festival"];
             application: components["schemas"]["Application"] | null;
+            /** Contacts */
+            contacts: components["schemas"]["Contact"][];
             /**
              * Status
              * @enum {string}

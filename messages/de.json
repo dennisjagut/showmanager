@@ -109,7 +109,7 @@
       "festival": "Festival",
       "month": "Monat",
       "deadline": "Deadline",
-      "contact": "Kontakt",
+      "contact": "Kontakte",
       "status": "Status {season}",
       "appliedNote": "Beworben / Notiz"
     },
@@ -165,7 +165,13 @@
     "removed": "Bewerbung für Saison {season} wird beim Speichern entfernt",
     "noApplicationsYet": "Noch keine Bewerbung erfasst.",
     "editTitle": "{name} bearbeiten",
-    "noMasterData": "Noch keine weiteren Angaben."
+    "noMasterData": "Noch keine weiteren Angaben.",
+    "noContacts": "Noch keine Kontakte verknüpft.",
+    "addContact": "+ Kontakt",
+    "removeContact": "{name} entfernen",
+    "pickContacts": "Kontakte auswählen",
+    "pickContactsHint": "Nur Kontakte aus eurer Kontaktliste, z. B. das Festival selbst oder die Person fürs Booking.",
+    "suggestedContacts": "Passend zum Festival"
   },
   "festivalForm": {
     "name": "Name *",
@@ -176,8 +182,8 @@
     "deadline": "Deadline Bewerbung",
     "deadlinePlaceholder": "z. B. vor Oktober",
     "website": "Website",
-    "contact": "Kontakt",
-    "contactPlaceholder": "E-Mail, Formular-Link, Ansprechpartner …",
+    "contacts": "Kontakte",
+    "contactsHint": "Kontakte verknüpft ihr nach dem Anlegen unter „Bearbeiten“, nur aus euren Kontakten.",
     "notes": "Hinweise",
     "active": "Festival existiert noch (aktiv)",
     "create": "Festival anlegen"
@@ -204,7 +210,7 @@
       "month": "Monat",
       "website": "Website",
       "deadline": "Deadline Bewerbung",
-      "contact": "Kontakt",
+      "contacts": "Kontakte",
       "notes": "Hinweise",
       "active": "Aktiv",
       "status": "Status {season}",

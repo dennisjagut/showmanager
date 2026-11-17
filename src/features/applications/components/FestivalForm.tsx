@@ -22,7 +22,7 @@ export function FestivalForm() {
         <TextField label={t("deadline")} name="deadline" placeholder={t("deadlinePlaceholder")} />
       </div>
       <TextField label={t("website")} name="website" type="url" placeholder="https://" />
-      <TextField label={t("contact")} name="contact" placeholder={t("contactPlaceholder")} />
+      <p className="text-sm text-zinc-500">{t("contactsHint")}</p>
       <TextAreaField label={t("notes")} name="notes" />
       <Checkbox label={t("active")} name="active" defaultChecked />
       <DataList id="states" values={STATES} />

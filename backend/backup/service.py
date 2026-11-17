@@ -9,7 +9,11 @@ def backup() -> dict[str, object]:
     table = repository.find_all
     return {
         "created": datetime.now(timezone.utc).isoformat(),
-        "applications": {"festivals": table("festivals"), "applications": table("applications")},
+        "applications": {
+            "festivals": table("festivals"),
+            "applications": table("applications"),
+            "contacts": table("festival_contacts"),
+        },
         "shows": {
             "shows": table("shows"),
             "schedule": table("show_schedule"),

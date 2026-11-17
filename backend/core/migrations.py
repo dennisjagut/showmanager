@@ -311,4 +311,39 @@ FROM `shows` s JOIN `contacts` c
 	AND c.`location` IS CASE WHEN instr(s.`address`, ',') > 0 THEN trim(substr(s.`address`, instr(s.`address`, ',') + 1)) ELSE s.`address` END;""",
         ],
     ),
+    (
+        "0009_festival_contacts",
+        [
+            """-- Contacts of a festival application, only from the contact list. Linked from the festival to the contact only.
+CREATE TABLE `festival_contacts` (
+	`festival_id` integer NOT NULL,
+	`contact_id` integer NOT NULL,
+	`sort_order` integer DEFAULT 0 NOT NULL,
+	PRIMARY KEY (`festival_id`, `contact_id`),
+	FOREIGN KEY (`festival_id`) REFERENCES `festivals`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`contact_id`) REFERENCES `contacts`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """CREATE INDEX `festival_contacts_contact` ON `festival_contacts` (`contact_id`);""",
+            """-- The free-text contact of a festival becomes an organization named like the festival, with the role festival and
+-- the festival's location and website. A single email address becomes its email, any other text (people, form links …)
+-- is kept in its notes. Identical entries become one contact. The column contact stays but is no longer used.
+INSERT INTO `contacts` (`kind`, `name`, `email`, `website`, `location`, `notes`)
+SELECT DISTINCT 'organization', f.`name`,
+	CASE WHEN trim(f.`contact`) LIKE '%_@_%._%' AND instr(trim(f.`contact`), ' ') = 0 AND instr(f.`contact`, char(10)) = 0 AND trim(f.`contact`) NOT LIKE 'http%' AND trim(f.`contact`) NOT LIKE 'www.%' THEN trim(f.`contact`) END,
+	f.`website`, f.`location`,
+	CASE WHEN trim(f.`contact`) LIKE '%_@_%._%' AND instr(trim(f.`contact`), ' ') = 0 AND instr(f.`contact`, char(10)) = 0 AND trim(f.`contact`) NOT LIKE 'http%' AND trim(f.`contact`) NOT LIKE 'www.%' THEN 'Aus den Angaben eines Festivals übernommen' ELSE 'Aus den Angaben eines Festivals übernommen:' || char(10) || f.`contact` END
+FROM `festivals` f
+WHERE f.`contact` IS NOT NULL;""",
+            """INSERT OR IGNORE INTO `contact_roles` (`contact_id`, `role`)
+SELECT `id`, 'festival' FROM `contacts` WHERE `kind` = 'organization' AND `notes` LIKE 'Aus den Angaben eines Festivals übernommen%';""",
+            """INSERT OR IGNORE INTO `festival_contacts` (`festival_id`, `contact_id`, `sort_order`)
+SELECT f.`id`, c.`id`, 10
+FROM `festivals` f JOIN `contacts` c
+	ON c.`kind` = 'organization' AND c.`name` = f.`name`
+	AND c.`email` IS CASE WHEN trim(f.`contact`) LIKE '%_@_%._%' AND instr(trim(f.`contact`), ' ') = 0 AND instr(f.`contact`, char(10)) = 0 AND trim(f.`contact`) NOT LIKE 'http%' AND trim(f.`contact`) NOT LIKE 'www.%' THEN trim(f.`contact`) END
+	AND c.`website` IS f.`website` AND c.`location` IS f.`location`
+	AND c.`notes` = CASE WHEN trim(f.`contact`) LIKE '%_@_%._%' AND instr(trim(f.`contact`), ' ') = 0 AND instr(f.`contact`, char(10)) = 0 AND trim(f.`contact`) NOT LIKE 'http%' AND trim(f.`contact`) NOT LIKE 'www.%' THEN 'Aus den Angaben eines Festivals übernommen' ELSE 'Aus den Angaben eines Festivals übernommen:' || char(10) || f.`contact` END
+WHERE f.`contact` IS NOT NULL;""",
+        ],
+    ),
 ]

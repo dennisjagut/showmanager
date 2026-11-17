@@ -148,6 +148,8 @@ export function ContactPicker({
           placeholder={t("searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          // The picker can sit inside a form (e.g. an editor): Enter in the search must not submit it
+          onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
           inputClassName="py-1.5"
         />
         <div className="flex flex-wrap items-end gap-2">

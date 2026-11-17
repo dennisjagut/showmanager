@@ -94,9 +94,11 @@ def save(contact: Contact, values: dict[str, object], roles: list[ContactRole], 
 
 
 def delete(contact_id: int) -> None:
-    """Deletes the contact with its roles and affiliations and removes it from shows; the linked contacts stay"""
+    """Deletes the contact with its roles and affiliations and removes it from shows and festivals; the linked contacts
+    stay"""
     with db.write() as w:
         w.execute("delete from show_contacts where contact_id = ?", (contact_id,))
+        w.execute("delete from festival_contacts where contact_id = ?", (contact_id,))
         w.execute("delete from contact_roles where contact_id = ?", (contact_id,))
         w.execute(
             "delete from contact_affiliations where person_id = ? or organization_id = ?", (contact_id, contact_id)

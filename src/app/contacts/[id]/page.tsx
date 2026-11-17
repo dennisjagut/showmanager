@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Facts, type Fact } from "@/components/ui/Facts";
 import { Notice } from "@/components/ui/Notice";
 import { Page, PageHeader } from "@/components/ui/Page";
-import { WebsiteLink } from "@/features/applications/components/Contact";
+import { WebsiteLink } from "@/features/applications/components/WebsiteLink";
 import { deleteContact } from "@/features/contacts/actions";
 import { getContact, getContactOptions } from "@/features/contacts/api";
 import { PhoneLink } from "@/features/contacts/components/ContactChannels";

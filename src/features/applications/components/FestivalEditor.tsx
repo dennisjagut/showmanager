@@ -12,10 +12,12 @@ import { SaveBar } from "@/components/ui/SaveBar";
 import { useDraft } from "@/components/ui/use-draft";
 import { saveFestival } from "@/features/applications/actions";
 import { Deadline } from "@/features/applications/components/Deadline";
+import { FestivalContactsField } from "@/features/applications/components/FestivalContactsField";
 import {
   STATES,
   applicationKey,
   countChanges,
+  countContactChanges,
   draftFrom,
   isApplicationEdited,
   isFieldChanged,
@@ -25,20 +27,24 @@ import {
   type FestivalField,
 } from "@/features/applications/festival-draft";
 import { APPLICATION_STATUSES } from "@/features/applications/status";
-import type { FestivalDetails } from "@/lib/api/types";
+import type { ContactDetails, FestivalDetails } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
 import { monthNames } from "@/lib/dates";
 
 /**
- * Edit mode of a festival: master data and the applications of all seasons in one draft, saved with one button.
+ * Edit mode of a festival: master data, contacts and the applications of all seasons in one draft, saved with one
+ * button.
  * "Abbrechen" and saving both go back to the read view.
  */
 export function FestivalEditor({
   details,
   season,
   readHref,
+  allContacts,
 }: {
   details: FestivalDetails;
+  // The whole contact list, to pick the festival's contacts from
+  allContacts: ContactDetails[];
   // Season the overview showed, suggested for a new application
   season: number;
   readHref: string;
@@ -232,7 +238,13 @@ export function FestivalEditor({
               <TextField label={tf("deadline")} placeholder={tf("deadlinePlaceholder")} {...field("deadline")} />
             </div>
             <TextField label={tf("website")} type="url" placeholder="https://" {...field("website")} />
-            <TextField label={tf("contact")} placeholder={tf("contactPlaceholder")} {...field("contact")} />
+            <FestivalContactsField
+              festivalName={draft.fields.name}
+              value={draft.contacts}
+              changed={countContactChanges(draft, saved) > 0}
+              allContacts={allContacts}
+              onChange={(contacts) => update({ ...draft, contacts })}
+            />
             <TextAreaField label={tf("notes")} {...field("notes")} />
             <Checkbox
               label={tf("active")}

@@ -5,6 +5,7 @@ from ..core import db
 TABLES = [
     "festivals",
     "applications",
+    "festival_contacts",
     "shows",
     "show_schedule",
     "show_guests",
