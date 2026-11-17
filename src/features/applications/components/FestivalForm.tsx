@@ -35,7 +35,7 @@ export function FestivalForm({ allContacts }: { allContacts: ContactDetails[] })
       </div>
       <div className="grid grid-cols-2 gap-3">
         <SelectField label={t("month")} name="month" options={[none, ...options.months]} />
-        <DeadlineInput label={t("deadline")} hint={t("deadlineHint")} name="deadline" />
+        <DeadlineInput label={t("deadline")} name="deadline" />
       </div>
       <TextField label={t("website")} name="website" type="url" placeholder="https://" />
       <FestivalContactsField

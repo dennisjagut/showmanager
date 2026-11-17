@@ -20,14 +20,12 @@ function monthDay(day: number, month: number): string {
  */
 export function DeadlineInput({
   label,
-  hint,
   name,
   value = "",
   onChange,
   changed,
 }: {
   label: React.ReactNode;
-  hint?: React.ReactNode;
   name?: string;
   value?: string;
   onChange?: (value: string) => void;
@@ -47,7 +45,7 @@ export function DeadlineInput({
   }
 
   return (
-    <Field as="div" label={label} hint={hint} changed={changed}>
+    <Field as="div" label={label} changed={changed}>
       <div className="grid grid-cols-[4.5rem_1fr] gap-2">
         <select
           aria-label={t("deadlineDay")}

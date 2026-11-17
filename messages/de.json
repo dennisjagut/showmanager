@@ -90,14 +90,6 @@
     "accepted": "Zusage",
     "skipped": "Nicht berücksichtigt"
   },
-  "applicationStatusHint": {
-    "open": "Noch nicht beworben",
-    "applied": "Bewerbung ist raus",
-    "no_response": "Bewerbung ohne Rückmeldung",
-    "rejected": "Festival hat abgesagt",
-    "accepted": "Wir spielen!",
-    "skipped": "Für dieses Jahr bewusst ausgelassen"
-  },
   "applications": {
     "title": "Bewerbungen Saison {season}",
     "summary": "{festivals} Festivals · {sent} Bewerbungen verschickt",
@@ -156,7 +148,6 @@
     "delete": "Festival endgültig löschen",
     "season": "Saison {season}",
     "status": "Status",
-    "statusOption": "{label} – {hint}",
     "appliedOn": "Beworben am",
     "note": "Notiz",
     "notePlaceholder": "z. B. per Mail an … geschickt, nachhaken im Januar",
@@ -179,7 +170,6 @@
     "state": "Bundesland",
     "month": "Festivalmonat",
     "deadline": "Deadline Bewerbung",
-    "deadlineHint": "Gilt jedes Jahr am selben Tag.",
     "deadlineDay": "Tag der Deadline",
     "deadlineMonth": "Monat der Deadline",
     "deadlineYearly": "jedes Jahr am {date}",

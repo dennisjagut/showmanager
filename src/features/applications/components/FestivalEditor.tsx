@@ -52,7 +52,6 @@ export function FestivalEditor({
   const t = useTranslations("festival");
   const tf = useTranslations("festivalForm");
   const ts = useTranslations("applicationStatus");
-  const th = useTranslations("applicationStatusHint");
   const tc = useTranslations("common");
   const options = useFestivalOptions();
   const router = useRouter();
@@ -189,7 +188,7 @@ export function FestivalEditor({
                     changed={!isNew && a.status !== before.get(a.key)?.status}
                     options={APPLICATION_STATUSES.map((s) => ({
                       value: s,
-                      label: t("statusOption", { label: ts(s), hint: th(s) }),
+                      label: ts(s),
                     }))}
                   />
                   <TextField
@@ -243,7 +242,6 @@ export function FestivalEditor({
               <SelectField label={tf("month")} {...select("month", options.months)} />
               <DeadlineInput
                 label={tf("deadline")}
-                hint={tf("deadlineHint")}
                 value={draft.fields.deadline}
                 onChange={(deadline) => update({ ...draft, fields: { ...draft.fields, deadline } })}
                 changed={isFieldChanged(draft, saved, "deadline")}
