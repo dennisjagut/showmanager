@@ -6,6 +6,7 @@ A web app for bands: keep track of festival applications, plan shows and calcula
 
 - **Applications:** festivals with deadline and contact, status per season, search and filters, deadlines that are close are highlighted.
 - **Shows:** gigs with venue, promoter, fee, travel and hotel, a running order from editable templates, a guest list with quota and a daysheet as PDF.
+- **Contacts:** people and organizations (promoters, venues, booking agencies, festivals, labels …) with one or more roles each. People are linked to the organizations they work for, with their position there. Search and filters by kind and role; ready to be reused for shows and festival applications.
 - **Master data:** data the shows build on, in tabs. So far packing lists (e.g. minimal and full setup), which a show picks and checks off item by item.
 - **Calculator:** fixed costs of a gig from vehicles, accommodation, crew and other items plus a buffer. Saved automatically for the whole band.
 - **Export:** CSV per module and a full backup as JSON.

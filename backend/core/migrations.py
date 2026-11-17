@@ -222,4 +222,40 @@ SELECT `show_id`, `item_id`, 'packed' FROM `show_packed_items`;""",
             """DROP TABLE `show_packed_items`;""",
         ],
     ),
+    (
+        "0006_contacts",
+        [
+            """-- People and organizations the band works with. kind is 'person' or 'organization'.
+CREATE TABLE `contacts` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`kind` text NOT NULL,
+	`name` text NOT NULL,
+	`email` text,
+	`phone` text,
+	`website` text,
+	`street` text,
+	`location` text,
+	`notes` text,
+	`created_at` text DEFAULT (datetime('now')) NOT NULL,
+	`updated_at` text DEFAULT (datetime('now')) NOT NULL
+);""",
+            """-- What a contact is for the band, e.g. promoter and venue at once. The roles are fixed in the code.
+CREATE TABLE `contact_roles` (
+	`contact_id` integer NOT NULL,
+	`role` text NOT NULL,
+	PRIMARY KEY (`contact_id`, `role`),
+	FOREIGN KEY (`contact_id`) REFERENCES `contacts`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """-- A person who works for an organization, with their position there (e.g. booker of a club)
+CREATE TABLE `contact_affiliations` (
+	`person_id` integer NOT NULL,
+	`organization_id` integer NOT NULL,
+	`position` text,
+	PRIMARY KEY (`person_id`, `organization_id`),
+	FOREIGN KEY (`person_id`) REFERENCES `contacts`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`organization_id`) REFERENCES `contacts`(`id`) ON UPDATE no action ON DELETE cascade
+);""",
+            """CREATE INDEX `contact_affiliations_organization` ON `contact_affiliations` (`organization_id`);""",
+        ],
+    ),
 ]

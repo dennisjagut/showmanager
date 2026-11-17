@@ -22,6 +22,14 @@ export type ShowDetails = Schemas["ShowDetails"];
 export type ShowList = Schemas["ShowList"];
 export type ShowPacking = Schemas["ShowPacking"];
 
+export type Contact = Schemas["Contact"];
+export type ContactRef = Schemas["ContactRef"];
+export type ContactLink = Schemas["ContactLink"];
+export type ContactDetails = Schemas["ContactDetails"];
+export type ContactList = Schemas["ContactList"];
+export type ContactCreate = Schemas["ContactIn"];
+export type ContactSave = Schemas["ContactSaveIn"];
+
 export type PackingList = Schemas["PackingList"];
 export type PackingListCategory = Schemas["PackingListCategory"];
 export type PackingListItem = Schemas["PackingListItem"];

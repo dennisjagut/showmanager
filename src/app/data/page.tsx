@@ -33,6 +33,12 @@ export default async function Data() {
           </a>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-sm">{t("exportContacts")}</span>
+          <a href="/export/contacts" className="btn-secondary">
+            {t("download")}
+          </a>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm">{t("exportCalculator")}</span>
           <a href="/export/calculator" className="btn-secondary">
             {t("download")}

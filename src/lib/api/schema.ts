@@ -402,6 +402,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Contact List
+         * @description All contacts with roles and links. Filters are the URL parameters of the page, unknown values are ignored.
+         */
+        get: operations["contact_list_api_v1_contacts_get"];
+        put?: never;
+        /** Create Contact */
+        post: operations["create_contact_api_v1_contacts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Contact Options
+         * @description Contacts to choose from in a form, e.g. all organizations, or only the venues
+         */
+        get: operations["contact_options_api_v1_contacts_options_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{contact_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contact Details */
+        get: operations["contact_details_api_v1_contacts__contact_id__get"];
+        /**
+         * Save Contact
+         * @description Saves fields, roles and links: links that are missing are removed, those without contact ID create a contact
+         */
+        put: operations["save_contact_api_v1_contacts__contact_id__put"];
+        post?: never;
+        /**
+         * Delete Contact
+         * @description The linked contacts stay, only the links to them are removed
+         */
+        delete: operations["delete_contact_api_v1_contacts__contact_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/packing-lists": {
         parameters: {
             query?: never;
@@ -825,6 +891,158 @@ export interface components {
             quantity: number;
             /** Duration */
             duration: number | null;
+        };
+        /** Contact */
+        Contact: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "person" | "organization";
+            /** Name */
+            name: string;
+            /** Email */
+            email: string | null;
+            /** Phone */
+            phone: string | null;
+            /** Website */
+            website: string | null;
+            /** Street */
+            street: string | null;
+            /** Location */
+            location: string | null;
+            /** Notes */
+            notes: string | null;
+            /** Createdat */
+            createdAt: string;
+            /** Updatedat */
+            updatedAt: string;
+        };
+        /** ContactDetails */
+        ContactDetails: {
+            contact: components["schemas"]["Contact"];
+            /** Roles */
+            roles: ("promoter" | "venue" | "festival" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+            /** Links */
+            links: components["schemas"]["ContactLink"][];
+        };
+        /**
+         * ContactIn
+         * @description A new contact. The kind cannot be changed afterwards.
+         */
+        ContactIn: {
+            /** Name */
+            name: string;
+            /** Email */
+            email?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Website */
+            website?: string | null;
+            /** Street */
+            street?: string | null;
+            /** Location */
+            location?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Roles
+             * @default []
+             */
+            roles: ("promoter" | "venue" | "festival" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+            /**
+             * Links
+             * @default []
+             */
+            links: components["schemas"]["ContactLinkIn"][];
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "person" | "organization";
+        };
+        /**
+         * ContactLink
+         * @description An affiliation seen from one side: the organization of a person, or a person of an organization
+         */
+        ContactLink: {
+            contact: components["schemas"]["ContactRef"];
+            /** Position */
+            position: string | null;
+        };
+        /**
+         * ContactLinkIn
+         * @description A link to a contact of the other kind: an existing one by ID, or a new one by name
+         */
+        ContactLinkIn: {
+            /** Contactid */
+            contactId?: number | null;
+            /** Name */
+            name?: string | null;
+            /** Position */
+            position?: string | null;
+        };
+        /** ContactList */
+        ContactList: {
+            /** Kinds */
+            kinds: {
+                [key: string]: number;
+            };
+            /** Roles */
+            roles: {
+                [key: string]: number;
+            };
+            /** Rows */
+            rows: components["schemas"]["ContactDetails"][];
+        };
+        /**
+         * ContactRef
+         * @description Short form of a contact, for links and for choosing one in a form
+         */
+        ContactRef: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "person" | "organization";
+            /** Name */
+            name: string;
+            /** Roles */
+            roles: ("promoter" | "venue" | "festival" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+        };
+        /**
+         * ContactSaveIn
+         * @description The contact as it should be afterwards: links that are missing are removed, the linked contacts stay
+         */
+        ContactSaveIn: {
+            /** Name */
+            name: string;
+            /** Email */
+            email?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Website */
+            website?: string | null;
+            /** Street */
+            street?: string | null;
+            /** Location */
+            location?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Roles
+             * @default []
+             */
+            roles: ("promoter" | "venue" | "festival" | "booking" | "management" | "label" | "media" | "service" | "other")[];
+            /**
+             * Links
+             * @default []
+             */
+            links: components["schemas"]["ContactLinkIn"][];
         };
         /**
          * Created
@@ -2271,6 +2489,201 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScheduleTemplate"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    contact_list_api_v1_contacts_get: {
+        parameters: {
+            query?: {
+                q?: string;
+                kind?: string;
+                role?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_contact_api_v1_contacts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Created"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    contact_options_api_v1_contacts_options_get: {
+        parameters: {
+            query?: {
+                kind?: string;
+                role?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactRef"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    contact_details_api_v1_contacts__contact_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDetails"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_contact_api_v1_contacts__contact_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactSaveIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDetails"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_contact_api_v1_contacts__contact_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
