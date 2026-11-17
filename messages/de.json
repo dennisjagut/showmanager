@@ -794,7 +794,15 @@
     "confirm": "Übernehmen",
     "noResults": "Keine Kontakte für diese Suche und Filter.",
     "empty": "Noch keine Kontakte.",
-    "missing": "Fehlt jemand?",
-    "createNew": "In den Kontakten anlegen ↗"
+    "createNew": "＋ Neuen Kontakt anlegen",
+    "createNamed": "＋ „{name}“ als neuen Kontakt anlegen",
+    "quickCreate": "Neuer Kontakt",
+    "quickCreateName": "Name der {kind} *",
+    "quickCreateHint": "Weitere Angaben wie E-Mail oder Telefon könnt ihr später auf der Seite des Kontakts ergänzen.",
+    "duplicate": "„{name}“ gibt es schon in der Liste. Trotzdem neu anlegen?",
+    "withRole": "Mit der Rolle „{role}“",
+    "create": "Anlegen",
+    "createError": "Konnte nicht angelegt werden. Bitte nochmal versuchen.",
+    "justCreated": "Gerade angelegt"
   }
 }

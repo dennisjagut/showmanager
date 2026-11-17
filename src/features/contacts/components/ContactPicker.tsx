@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Drawer } from "@/components/ui/Drawer";
@@ -16,13 +17,14 @@ import {
 } from "@/features/contacts/kinds";
 import type { ContactDetails } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
+import { QuickCreateContact } from "./QuickCreateContact";
 
 export type PickerFilters = { kind: ContactKind | null; role: ContactRole | null };
 
 /**
  * Picks contacts from the contact list, in the Drawer: a drawer on the right from tablet width, a sheet from the
- * bottom on the phone. Only existing contacts can be chosen; a link opens the contacts in a new tab to add one.
- * Nothing changes until "Übernehmen", which hands the chosen IDs over in the order they were picked. With `single`,
+ * bottom on the phone. Only contacts from the list can be chosen; a missing one is created right here with its name
+ * and chosen at once. Nothing changes until "Übernehmen", which hands the chosen IDs over in the order they were picked. With `single`,
  * at most one can be chosen (picking another replaces it); with `onlyKind`, only people or only organizations.
  */
 export function ContactPicker({
@@ -63,6 +65,10 @@ export function ContactPicker({
   const [picked, setPicked] = useState(selected);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState(defaults);
+  // Contacts created in this drawer, shown first until it closes; null: the form to create one is closed
+  const [created, setCreated] = useState<ContactDetails[]>([]);
+  const [newName, setNewName] = useState<string | null>(null);
+  const router = useRouter();
 
   // Every time it opens, it starts from the current state of the show
   const [wasOpen, setWasOpen] = useState(open);
@@ -72,6 +78,8 @@ export function ContactPicker({
       setPicked(selected);
       setSearch("");
       setFilters(defaults);
+      setCreated([]);
+      setNewName(null);
     }
   }
 
@@ -84,10 +92,11 @@ export function ContactPicker({
       .includes(query);
   const byId = new Map(contacts.map((d) => [d.contact.id, d]));
   const allowed = (d: ContactDetails) => !onlyKind || d.contact.kind === onlyKind;
+  const createdIds = new Set(created.map((d) => d.contact.id));
   const suggestions = (suggested?.ids ?? [])
     .flatMap((id) => byId.get(id) ?? [])
-    .filter((d) => allowed(d) && matches(d));
-  const shownAbove = new Set(suggestions.map((d) => d.contact.id));
+    .filter((d) => !createdIds.has(d.contact.id) && allowed(d) && matches(d));
+  const shownAbove = new Set([...createdIds, ...suggestions.map((d) => d.contact.id)]);
   const rest = contacts.filter(
     (d) =>
       !shownAbove.has(d.contact.id) &&
@@ -98,6 +107,16 @@ export function ContactPicker({
   );
   const filtered = !!(query || filters.kind || filters.role);
   const newKind = onlyKind ?? filters.kind ?? "organization";
+  const names = new Set([...contacts, ...created].map((d) => d.contact.name.toLowerCase()));
+
+  function onCreated(details: ContactDetails) {
+    setCreated((list) => [details, ...list]);
+    setPicked((list) => (single ? [details.contact.id] : [...list, details.contact.id]));
+    setNewName(null);
+    setSearch("");
+    // The page gets the new contact too, e.g. to show it once it is linked
+    router.refresh();
+  }
 
   function toggle(id: number) {
     setPicked((list) => {
@@ -179,6 +198,26 @@ export function ContactPicker({
           />
         </div>
 
+        {newName !== null && (
+          <QuickCreateContact
+            defaultName={newName}
+            defaultKind={newKind}
+            onlyKind={onlyKind}
+            role={filters.role}
+            existingNames={names}
+            onCreated={onCreated}
+            onCancel={() => setNewName(null)}
+          />
+        )}
+
+        {created.length > 0 && (
+          <Group title={t("justCreated")}>
+            {created.map((d) => (
+              <Row key={d.contact.id} details={d} checked={picked.includes(d.contact.id)} onToggle={toggle} />
+            ))}
+          </Group>
+        )}
+
         {suggestions.length > 0 && (
           <Group title={suggested?.label}>
             {suggestions.map((d) => (
@@ -187,7 +226,7 @@ export function ContactPicker({
           </Group>
         )}
 
-        <Group title={suggestions.length > 0 ? t("allContacts") : undefined}>
+        <Group title={suggestions.length > 0 || created.length > 0 ? t("allContacts") : undefined}>
           {rest.map((d) => (
             <Row key={d.contact.id} details={d} checked={picked.includes(d.contact.id)} onToggle={toggle} />
           ))}
@@ -196,13 +235,15 @@ export function ContactPicker({
           )}
         </Group>
 
-        <p className="text-sm text-zinc-500">
-          {t("missing")}{" "}
-          {/* New tab: the choice made here stays, the new contact shows up when the drawer opens again */}
-          <a href={`/contacts/new?kind=${newKind}`} target="_blank" rel="noreferrer" className="link">
-            {t("createNew")}
-          </a>
-        </p>
+        {newName === null && (
+          <button
+            type="button"
+            onClick={() => setNewName(search.trim())}
+            className="btn-secondary w-full pointer-coarse:min-h-11"
+          >
+            {search.trim() ? t("createNamed", { name: search.trim() }) : t("createNew")}
+          </button>
+        )}
       </div>
     </Drawer>
   );
