@@ -46,15 +46,20 @@ export function draftFrom({ contact, roles, links }: ContactDetails): ContactDra
   };
 }
 
+// The links as the API takes them: an existing contact by ID, a new one by name
+export function linksBody(links: LinkDraft[]): ContactSave["links"] {
+  return links.map((l) =>
+    l.contactId === null
+      ? { name: l.name.trim(), position: l.position.trim() }
+      : { contactId: l.contactId, position: l.position.trim() },
+  );
+}
+
 export function saveBody(draft: ContactDraft): ContactSave {
   return {
     ...draft.fields,
     roles: CONTACT_ROLES.filter((r) => draft.roles.includes(r)),
-    links: draft.links.map((l) =>
-      l.contactId === null
-        ? { name: l.name.trim(), position: l.position.trim() }
-        : { contactId: l.contactId, position: l.position.trim() },
-    ),
+    links: linksBody(draft.links),
   };
 }
 

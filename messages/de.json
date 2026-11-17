@@ -706,6 +706,10 @@
       "person": "Neue Person",
       "organization": "Neue Organisation"
     },
+    "create": {
+      "person": "Person anlegen",
+      "organization": "Organisation anlegen"
+    },
     "editTitle": "{name} bearbeiten",
     "details": "Kontaktdaten",
     "noDetails": "Noch keine Kontaktdaten.",
@@ -768,8 +772,6 @@
       "person": "Vor- und Nachname *",
       "organization": "Name *"
     },
-    "organization": "Arbeitet für",
-    "noOrganization": "– keine –",
     "email": "E-Mail",
     "phone": "Telefon",
     "website": "Website",

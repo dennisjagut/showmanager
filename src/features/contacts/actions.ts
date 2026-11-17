@@ -21,9 +21,19 @@ function text(formData: FormData, name: string): string {
   return typeof value === "string" ? value : "";
 }
 
-// The form of a new contact: the roles are checkboxes with the same name, a person can name an organization right away
+// The links of the form as JSON (see NewContactLinks); the API checks each entry
+function links(formData: FormData): ContactCreate["links"] {
+  try {
+    const value: unknown = JSON.parse(text(formData, "links") || "[]");
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
+// The form of a new contact: the roles are checkboxes with the same name, the links to organizations or people come as
+// JSON from NewContactLinks
 export async function createContact(formData: FormData) {
-  const organizationId = text(formData, "organizationId");
   const body: ContactCreate = {
     kind: text(formData, "kind") as ContactCreate["kind"],
     name: text(formData, "name"),
@@ -34,7 +44,7 @@ export async function createContact(formData: FormData) {
     location: text(formData, "location"),
     notes: text(formData, "notes"),
     roles: formData.getAll("roles").map(String) as ContactCreate["roles"],
-    links: organizationId ? [{ contactId: Number(idOf(organizationId)), position: text(formData, "position") }] : [],
+    links: links(formData),
   };
   const { id } = await api.post<Created>(CONTACTS, body);
   refresh();
