@@ -208,8 +208,13 @@ def set_contacts(show_id: int, body: ShowContactsIn) -> ShowDetails | None:
 
 
 def shows_of_contact(contact_id: int) -> list[ContactShow]:
-    """Shows the contact is linked to, newest first"""
-    return [ContactShow(show=show, role=role) for show, role in repository.find_shows_of_contact(contact_id)]
+    """Shows the contact is linked to, newest first, each once with all its roles there"""
+    shows: dict[int, ContactShow] = {}
+    for show, role in repository.find_shows_of_contact(contact_id):
+        shows.setdefault(show.id, ContactShow(show=show, roles=[])).roles.append(role)
+    for entry in shows.values():
+        entry.roles.sort(key=SHOW_CONTACT_ROLES.index)
+    return list(shows.values())
 
 
 # --- Running order ---------------------------------------------------------------------------------------------------

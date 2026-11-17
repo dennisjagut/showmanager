@@ -146,7 +146,7 @@ def find_contact_links(show_id: int | None = None) -> list[tuple[int, int, ShowC
 
 
 def find_shows_of_contact(contact_id: int) -> list[tuple[Show, ShowContactRole]]:
-    """Shows the contact is linked to, newest first, with its role there"""
+    """Shows the contact is linked to, newest first, one row per role (the service puts them together)"""
     rows = db.query(
         """select s.*, sc.role sc_role from shows s join show_contacts sc on sc.show_id = s.id
            where sc.contact_id = ? order by s.date desc, s.id""",

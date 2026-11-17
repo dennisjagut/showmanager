@@ -97,7 +97,8 @@ class ContactShow(ApiModel):
     """A show a contact is linked to, seen from the contact"""
 
     show: Show
-    role: ShowContactRole
+    # Everything the contact is for this show, e.g. venue and promoter at once; in the order venue, promoter, contact
+    roles: list[ShowContactRole]
 
 
 class ShowContactsIn(ApiModel):

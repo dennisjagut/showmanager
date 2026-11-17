@@ -92,7 +92,7 @@ def set_contacts(show_id: int, body: ShowContactsIn) -> ShowDetails:
 
 @router.get("/contacts/{contact_id}/shows")
 def shows_of_contact(contact_id: int) -> list[ContactShow]:
-    """Shows a contact is linked to, newest first, with its role there"""
+    """Shows a contact is linked to, newest first, each once with all its roles there"""
     return service.shows_of_contact(contact_id)
 
 

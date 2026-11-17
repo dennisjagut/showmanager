@@ -151,14 +151,14 @@ export default async function ContactPage({ params, searchParams }: Props) {
           {shows.length > 0 ? (
             <Card className="p-0">
               <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {shows.map(({ show: s, role }) => (
-                  <li key={`${s.id}-${role}`} className="flex items-start gap-3 px-4 py-3 text-sm">
+                {shows.map(({ show: s, roles: showRoles }) => (
+                  <li key={s.id} className="flex items-start gap-3 px-4 py-3 text-sm">
                     <span className="w-24 shrink-0 text-zinc-500 tabular-nums">{formatDate(s.date, locale)}</span>
                     <div className="min-w-0 flex-1">
                       <Link href={`/shows/${s.id}`} className="font-medium link">
                         {s.title}
                       </Link>
-                      <div className="text-zinc-500">{tsc(`roleAtShow.${role}`)}</div>
+                      <div className="text-zinc-500">{showRoles.map((r) => tsc(`roleAtShow.${r}`)).join(" · ")}</div>
                     </div>
                     {s.status !== "confirmed" && <Badge tone={SHOW_STATUS_TONE[s.status]}>{ts(s.status)}</Badge>}
                   </li>

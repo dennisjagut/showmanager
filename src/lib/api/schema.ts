@@ -370,7 +370,7 @@ export interface paths {
         };
         /**
          * Shows Of Contact
-         * @description Shows a contact is linked to, newest first, with its role there
+         * @description Shows a contact is linked to, newest first, each once with all its roles there
          */
         get: operations["shows_of_contact_api_v1_contacts__contact_id__shows_get"];
         put?: never;
@@ -1090,11 +1090,8 @@ export interface components {
          */
         ContactShow: {
             show: components["schemas"]["Show"];
-            /**
-             * Role
-             * @enum {string}
-             */
-            role: "venue" | "promoter" | "contact";
+            /** Roles */
+            roles: ("venue" | "promoter" | "contact")[];
         };
         /**
          * Created
