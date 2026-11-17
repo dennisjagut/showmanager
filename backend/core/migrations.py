@@ -350,8 +350,8 @@ WHERE f.`contact` IS NOT NULL;""",
         "0010_festival_fixed_fields",
         [
             """-- Festival month, deadline and federal state were free text. From now on the month is a number (1 = January),
--- the deadline day and month (MM-DD) that repeat every year and the state one of the 16 codes. Text that does not fit is kept
--- in the notes, so nothing gets lost.
+-- the deadline day and month (MM-DD) that repeat every year and the state one of the 16 codes. Text without a month
+-- or a known state becomes empty.
 CREATE TABLE `_month_names` (`number` integer NOT NULL, `name` text NOT NULL);""",
             """INSERT INTO `_month_names` (`number`, `name`) VALUES
 	(1, 'januar'), (2, 'februar'), (3, 'märz'), (3, 'maerz'), (4, 'april'), (5, 'mai'), (6, 'juni'), (7, 'juli'),
@@ -364,41 +364,21 @@ CREATE TABLE `_month_names` (`number` integer NOT NULL, `name` text NOT NULL);""
 	('SL', 'saarland'), ('SN', 'sachsen'), ('ST', 'sachsen-anhalt'), ('SH', 'schleswig-holstein'),
 	('TH', 'thüringen'), ('TH', 'thueringen');""",
             """ALTER TABLE `festivals` ADD `month_number` integer;""",
-            """ALTER TABLE `festivals` ADD `deadline_month` integer;""",
             """ALTER TABLE `festivals` ADD `deadline_date` text;""",
             """ALTER TABLE `festivals` ADD `state_code` text;""",
-            """-- The first month named in the text, as the app read it so far ("Juli/August" → July)
+            """-- Month and deadline: the first month named in the text ("Juli/August" → July). The deadline is the last day of
+-- that month without a year ("vor Oktober" → 10-31); February always ends on the 28th here.
 UPDATE `festivals` SET
 	`month_number` = (SELECT `number` FROM `_month_names` WHERE lower(`month`) LIKE '%' || `name` || '%'
 		ORDER BY `number` LIMIT 1),
-	`deadline_month` = (SELECT `number` FROM `_month_names` WHERE lower(`deadline`) LIKE '%' || `name` || '%'
-		ORDER BY `number` LIMIT 1),
+	`deadline_date` = (SELECT strftime('%m-%d', date(printf('2001-%02d-01', `number`), '+1 month', '-1 day'))
+		FROM `_month_names` WHERE lower(`deadline`) LIKE '%' || `name` || '%' ORDER BY `number` LIMIT 1),
 	`state_code` = coalesce(
 		(SELECT `code` FROM `_state_names` WHERE `code` = upper(trim(`state`)) LIMIT 1),
 		(SELECT `code` FROM `_state_names` WHERE `name` = lower(trim(`state`)) LIMIT 1));""",
-            """-- "ab Juni" ("from June") names the start of the application period, not its end
-UPDATE `festivals` SET `deadline_month` = NULL WHERE lower(trim(`deadline`)) LIKE 'ab %';""",
-            """-- The last day of the month as MM-DD, without a year: "Oktober" and "bis Oktober" → 10-31, "vor Oktober" → 09-30.
--- February always ends on the 28th here.
-UPDATE `festivals` SET `deadline_date` = (
-	SELECT strftime('%m-%d', date(printf('2001-%02d-01', iif(m.target = 0, 12, m.target)), '+1 month', '-1 day'))
-	FROM (SELECT `deadline_month` - iif(lower(trim(`deadline`)) LIKE 'vor %', 1, 0) AS target) m
-) WHERE `deadline_month` IS NOT NULL;""",
-            """-- Keep the old text in the notes where the new field cannot hold all of it
-UPDATE `festivals` SET `notes` = coalesce(`notes` || char(10), '') || 'Festivalmonat bisher: ' || `month`
-WHERE `month` IS NOT NULL AND (`month_number` IS NULL OR lower(trim(`month`)) NOT IN (
-	SELECT `name` FROM `_month_names` WHERE `number` = `month_number`));""",
-            """UPDATE `festivals` SET `notes` = coalesce(`notes` || char(10), '') || 'Deadline bisher: ' || `deadline`
-WHERE `deadline` IS NOT NULL AND (`deadline_date` IS NULL OR lower(trim(`deadline`)) NOT IN (
-	SELECT `name` FROM `_month_names` WHERE `number` = `deadline_month`
-	UNION SELECT 'vor ' || `name` FROM `_month_names` WHERE `number` = `deadline_month`
-	UNION SELECT 'bis ' || `name` FROM `_month_names` WHERE `number` = `deadline_month`));""",
-            """UPDATE `festivals` SET `notes` = coalesce(`notes` || char(10), '') || 'Bundesland bisher: ' || `state`
-WHERE `state` IS NOT NULL AND `state_code` IS NULL;""",
             """ALTER TABLE `festivals` DROP COLUMN `month`;""",
             """ALTER TABLE `festivals` DROP COLUMN `deadline`;""",
             """ALTER TABLE `festivals` DROP COLUMN `state`;""",
-            """ALTER TABLE `festivals` DROP COLUMN `deadline_month`;""",
             """ALTER TABLE `festivals` RENAME COLUMN `month_number` TO `month`;""",
             """ALTER TABLE `festivals` RENAME COLUMN `deadline_date` TO `deadline`;""",
             """ALTER TABLE `festivals` RENAME COLUMN `state_code` TO `state`;""",
