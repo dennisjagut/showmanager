@@ -1,11 +1,9 @@
+import type { State } from "@/features/applications/options";
 import type { Application, FestivalDetails, FestivalSave } from "@/lib/api/types";
 
 // The festival with its applications and contacts while it is being edited. Nothing is saved until "Speichern", then
 // the festival is sent with all its applications and contacts at once. Applications are identified by their season;
 // removed ones stay in the list, marked, so they can be brought back until saving.
-
-// German federal states
-export const STATES = ["BB", "BE", "BW", "BY", "HB", "HE", "HH", "MV", "NI", "NW", "RP", "SH", "SL", "SN", "ST", "TH"];
 
 export const FESTIVAL_FIELDS = ["name", "location", "state", "month", "website", "deadline", "notes"] as const;
 export type FestivalField = (typeof FESTIVAL_FIELDS)[number];
@@ -32,7 +30,7 @@ export function applicationKey(season: number): string {
 }
 
 export function draftFrom({ festival, applications, contacts }: FestivalDetails): FestivalDraft {
-  const fields = Object.fromEntries(FESTIVAL_FIELDS.map((k) => [k, festival[k] ?? ""])) as Record<
+  const fields = Object.fromEntries(FESTIVAL_FIELDS.map((k) => [k, String(festival[k] ?? "")])) as Record<
     FestivalField,
     string
   >;
@@ -52,8 +50,12 @@ export function draftFrom({ festival, applications, contacts }: FestivalDetails)
 }
 
 export function saveBody(draft: FestivalDraft): FestivalSave {
+  const { state, month, deadline, ...fields } = draft.fields;
   return {
-    ...draft.fields,
+    ...fields,
+    state: (state || null) as State | null,
+    month: month ? Number(month) : null,
+    deadline: deadline || null,
     active: draft.active,
     contacts: draft.contacts,
     applications: draft.applications

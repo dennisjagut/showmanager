@@ -37,6 +37,17 @@ export function formatDate(iso: string | null | undefined, locale: string): stri
   return format(iso, locale, { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
+// Day and month without the year, from an ISO date or MM-DD: "30.09." (short) or "30. September" (long)
+export function formatDayMonth(value: string, locale: string, style: "short" | "long" = "short"): string {
+  // 2000 is a leap year, so 02-29 works as well
+  const iso = value.length === 5 ? `2000-${value}` : value;
+  return format(
+    iso,
+    locale,
+    style === "long" ? { day: "numeric", month: "long" } : { day: "2-digit", month: "2-digit" },
+  );
+}
+
 // e.g. "Samstag, 12. Juni 2027"
 export function formatLongDate(iso: string, locale: string): string {
   return format(iso, locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -52,8 +63,13 @@ export function dateParts(iso: string, locale: string) {
   };
 }
 
-// Month names in the given language, e.g. as suggestions for the festival month
+// Month names in the given language, January first
 export function monthNames(locale: string): string[] {
   const names = new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" });
   return Array.from({ length: 12 }, (_, i) => names.format(new Date(Date.UTC(2000, i, 1))));
+}
+
+// Name of a month given as number, 1 = January
+export function monthName(month: number | null | undefined, locale: string): string {
+  return month ? (monthNames(locale)[month - 1] ?? "") : "";
 }

@@ -1,7 +1,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { listFestivals } from "@/features/applications/api";
 import { csvResponse, csvText } from "@/lib/csv";
-import { formatDate } from "@/lib/dates";
+import { formatDate, formatDayMonth, monthName } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
@@ -35,9 +35,9 @@ export async function GET(request: Request) {
     f.name,
     f.location,
     f.state,
-    f.month,
+    monthName(f.month, locale),
     f.website,
-    f.deadline,
+    f.deadline && formatDayMonth(f.deadline, locale),
     contacts.map((c) => [c.name, c.email, c.phone].filter(Boolean).join(", ")).join("\n"),
     f.notes,
     f.active ? tc("yes") : tc("no"),

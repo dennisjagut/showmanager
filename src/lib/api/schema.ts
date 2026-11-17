@@ -1112,13 +1112,11 @@ export interface components {
         };
         /**
          * Deadline
-         * @description Approximate deadline for one season, derived from the free text
+         * @description Deadline of the festival in one season
          */
         Deadline: {
             /** Date */
             date: string;
-            /** Uncertain */
-            uncertain: boolean;
             /**
              * State
              * @enum {string}
@@ -1134,9 +1132,9 @@ export interface components {
             /** Location */
             location: string | null;
             /** State */
-            state: string | null;
+            state: ("BB" | "BE" | "BW" | "BY" | "HB" | "HE" | "HH" | "MV" | "NI" | "NW" | "RP" | "SH" | "SL" | "SN" | "ST" | "TH") | null;
             /** Month */
-            month: string | null;
+            month: number | null;
             /** Website */
             website: string | null;
             /** Deadline */
@@ -1166,9 +1164,9 @@ export interface components {
             /** Location */
             location?: string | null;
             /** State */
-            state?: string | null;
+            state?: ("BB" | "BE" | "BW" | "BY" | "HB" | "HE" | "HH" | "MV" | "NI" | "NW" | "RP" | "SH" | "SL" | "SN" | "ST" | "TH") | null;
             /** Month */
-            month?: string | null;
+            month?: number | null;
             /** Website */
             website?: string | null;
             /** Deadline */
@@ -1210,9 +1208,9 @@ export interface components {
             /** Location */
             location?: string | null;
             /** State */
-            state?: string | null;
+            state?: ("BB" | "BE" | "BW" | "BY" | "HB" | "HE" | "HH" | "MV" | "NI" | "NW" | "RP" | "SH" | "SL" | "SN" | "ST" | "TH") | null;
             /** Month */
-            month?: string | null;
+            month?: number | null;
             /** Website */
             website?: string | null;
             /** Deadline */
@@ -1291,7 +1289,7 @@ export interface components {
             season: number;
             seasons: components["schemas"]["Seasons"];
             /** States */
-            states: string[];
+            states: ("BB" | "BE" | "BW" | "BY" | "HB" | "HE" | "HH" | "MV" | "NI" | "NW" | "RP" | "SH" | "SL" | "SN" | "ST" | "TH")[];
             /** Soondays */
             soonDays: number;
             /** Festivals */

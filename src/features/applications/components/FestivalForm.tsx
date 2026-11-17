@@ -1,20 +1,21 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Checkbox, DataList, TextAreaField, TextField } from "@/components/ui/Field";
+import { Checkbox, SelectField, TextAreaField, TextField } from "@/components/ui/Field";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { createFestival } from "@/features/applications/actions";
+import { DeadlineInput } from "@/features/applications/components/DeadlineInput";
 import { FestivalContactsField } from "@/features/applications/components/FestivalContactsField";
-import { STATES } from "@/features/applications/festival-draft";
+import { useFestivalOptions } from "@/features/applications/options";
 import type { ContactDetails } from "@/lib/api/types";
-import { monthNames } from "@/lib/dates";
 
 // Form for a new festival; an existing one is edited in FestivalEditor. The contacts are picked like in the editor and
 // sent as JSON in the hidden field "contacts"; the name is kept here for the picker's suggestions.
 export function FestivalForm({ allContacts }: { allContacts: ContactDetails[] }) {
   const t = useTranslations("festivalForm");
-  const locale = useLocale();
+  const options = useFestivalOptions();
+  const none = { value: "", label: t("none") };
   const [name, setName] = useState("");
   const [contacts, setContacts] = useState<number[]>([]);
 
@@ -28,13 +29,13 @@ export function FestivalForm({ allContacts }: { allContacts: ContactDetails[] })
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      <div className="grid grid-cols-[1fr_7rem] gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <TextField label={t("location")} name="location" placeholder={t("locationPlaceholder")} />
-        <TextField label={t("state")} name="state" list="states" maxLength={20} />
+        <SelectField label={t("state")} name="state" options={[none, ...options.states]} />
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <TextField label={t("month")} name="month" list="months" />
-        <TextField label={t("deadline")} name="deadline" placeholder={t("deadlinePlaceholder")} />
+        <SelectField label={t("month")} name="month" options={[none, ...options.months]} />
+        <DeadlineInput label={t("deadline")} name="deadline" />
       </div>
       <TextField label={t("website")} name="website" type="url" placeholder="https://" />
       <FestivalContactsField
@@ -47,8 +48,6 @@ export function FestivalForm({ allContacts }: { allContacts: ContactDetails[] })
       <input type="hidden" name="contacts" value={JSON.stringify(contacts)} />
       <TextAreaField label={t("notes")} name="notes" />
       <Checkbox label={t("active")} name="active" defaultChecked />
-      <DataList id="states" values={STATES} />
-      <DataList id="months" values={monthNames(locale)} />
       <SubmitButton className="btn-primary">{t("create")}</SubmitButton>
     </form>
   );

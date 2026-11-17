@@ -346,4 +346,44 @@ FROM `festivals` f JOIN `contacts` c
 WHERE f.`contact` IS NOT NULL;""",
         ],
     ),
+    (
+        "0010_festival_fixed_fields",
+        [
+            """-- Festival month, deadline and federal state were free text. From now on the month is a number (1 = January),
+-- the deadline day and month (MM-DD) that repeat every year and the state one of the 16 codes. Text without a month
+-- or a known state becomes empty.
+CREATE TABLE `_month_names` (`number` integer NOT NULL, `name` text NOT NULL);""",
+            """INSERT INTO `_month_names` (`number`, `name`) VALUES
+	(1, 'januar'), (2, 'februar'), (3, 'märz'), (3, 'maerz'), (4, 'april'), (5, 'mai'), (6, 'juni'), (7, 'juli'),
+	(8, 'august'), (9, 'september'), (10, 'oktober'), (11, 'november'), (12, 'dezember');""",
+            """CREATE TABLE `_state_names` (`code` text NOT NULL, `name` text NOT NULL);""",
+            """INSERT INTO `_state_names` (`code`, `name`) VALUES
+	('BW', 'baden-württemberg'), ('BW', 'baden-wuerttemberg'), ('BY', 'bayern'), ('BE', 'berlin'),
+	('BB', 'brandenburg'), ('HB', 'bremen'), ('HH', 'hamburg'), ('HE', 'hessen'), ('MV', 'mecklenburg-vorpommern'),
+	('NI', 'niedersachsen'), ('NW', 'nordrhein-westfalen'), ('NW', 'nrw'), ('RP', 'rheinland-pfalz'),
+	('SL', 'saarland'), ('SN', 'sachsen'), ('ST', 'sachsen-anhalt'), ('SH', 'schleswig-holstein'),
+	('TH', 'thüringen'), ('TH', 'thueringen');""",
+            """ALTER TABLE `festivals` ADD `month_number` integer;""",
+            """ALTER TABLE `festivals` ADD `deadline_date` text;""",
+            """ALTER TABLE `festivals` ADD `state_code` text;""",
+            """-- Month and deadline: the first month named in the text ("Juli/August" → July). The deadline is the last day of
+-- that month without a year ("vor Oktober" → 10-31); February always ends on the 28th here.
+UPDATE `festivals` SET
+	`month_number` = (SELECT `number` FROM `_month_names` WHERE lower(`month`) LIKE '%' || `name` || '%'
+		ORDER BY `number` LIMIT 1),
+	`deadline_date` = (SELECT strftime('%m-%d', date(printf('2001-%02d-01', `number`), '+1 month', '-1 day'))
+		FROM `_month_names` WHERE lower(`deadline`) LIKE '%' || `name` || '%' ORDER BY `number` LIMIT 1),
+	`state_code` = coalesce(
+		(SELECT `code` FROM `_state_names` WHERE `code` = upper(trim(`state`)) LIMIT 1),
+		(SELECT `code` FROM `_state_names` WHERE `name` = lower(trim(`state`)) LIMIT 1));""",
+            """ALTER TABLE `festivals` DROP COLUMN `month`;""",
+            """ALTER TABLE `festivals` DROP COLUMN `deadline`;""",
+            """ALTER TABLE `festivals` DROP COLUMN `state`;""",
+            """ALTER TABLE `festivals` RENAME COLUMN `month_number` TO `month`;""",
+            """ALTER TABLE `festivals` RENAME COLUMN `deadline_date` TO `deadline`;""",
+            """ALTER TABLE `festivals` RENAME COLUMN `state_code` TO `state`;""",
+            """DROP TABLE `_month_names`;""",
+            """DROP TABLE `_state_names`;""",
+        ],
+    ),
 ]

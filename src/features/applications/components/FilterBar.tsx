@@ -1,11 +1,11 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 import { Checkbox, SelectField, TextField, type Option } from "@/components/ui/Field";
 import { cn } from "@/lib/cn";
-import { monthNames } from "@/lib/dates";
+import { useFestivalOptions, type State } from "@/features/applications/options";
 import { APPLICATION_STATUSES } from "@/features/applications/status";
 
 const FILTERS = ["q", "status", "state", "month", "deadline", "inactive"];
@@ -18,13 +18,15 @@ export function FilterBar({
 }: {
   season: number;
   seasons: number[];
-  states: string[];
+  // Federal states that festivals are in
+  states: State[];
   // days ahead in which a deadline counts as "soon"
   soonDays: number;
 }) {
   const t = useTranslations("filters");
   const ts = useTranslations("applicationStatus");
-  const locale = useLocale();
+  const tStates = useTranslations("states");
+  const options = useFestivalOptions();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -59,8 +61,6 @@ export function FilterBar({
   );
 
   const hasFilter = FILTERS.some((k) => params.has(k));
-  // Festival season: May to October
-  const months = monthNames(locale).slice(4, 10);
 
   return (
     <div
@@ -93,13 +93,9 @@ export function FilterBar({
       {select(
         "state",
         t("state"),
-        states.map((s) => ({ value: s, label: s })),
+        states.map((s) => ({ value: s, label: tStates(s) })),
       )}
-      {select(
-        "month",
-        t("festivalMonth"),
-        months.map((m) => ({ value: m, label: m })),
-      )}
+      {select("month", t("festivalMonth"), options.months)}
       {select("deadline", t("deadline"), [
         { value: "soon", label: t("deadlineSoon", { days: soonDays }) },
         { value: "passed", label: t("deadlinePassed") },

@@ -3,9 +3,10 @@
 Python uses snake_case, the JSON for the frontend camelCase: ApiModel converts between them.
 """
 
+from datetime import date
 from typing import Annotated
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
 
@@ -19,7 +20,7 @@ class Created(ApiModel):
     id: int
 
 
-def _empty_to_none(value: object) -> object:
+def empty_to_none(value: object) -> object:
     if isinstance(value, str):
         value = value.strip()
         return value or None
@@ -27,19 +28,32 @@ def _empty_to_none(value: object) -> object:
 
 
 # Text fields from forms: trimmed, empty becomes None
-OptionalText = Annotated[str | None, BeforeValidator(_empty_to_none)]
+OptionalText = Annotated[str | None, BeforeValidator(empty_to_none)]
 RequiredText = Annotated[str, BeforeValidator(lambda v: v.strip() if isinstance(v, str) else v), Field(min_length=1)]
 
 # Whole number ≥ 0 from a form field, e.g. a quota; empty becomes None
-OptionalCount = Annotated[Annotated[int, Field(ge=0)] | None, BeforeValidator(_empty_to_none)]
+OptionalCount = Annotated[Annotated[int, Field(ge=0)] | None, BeforeValidator(empty_to_none)]
 
 # Number of pieces ≥ 1 from a form field; empty becomes None
-OptionalQuantity = Annotated[Annotated[int, Field(ge=1, le=999)] | None, BeforeValidator(_empty_to_none)]
+OptionalQuantity = Annotated[Annotated[int, Field(ge=1, le=999)] | None, BeforeValidator(empty_to_none)]
 
 # ID of another entity from a select field; empty ("none selected") becomes None
-OptionalId = Annotated[Annotated[int, Field(ge=1)] | None, BeforeValidator(_empty_to_none)]
+OptionalId = Annotated[Annotated[int, Field(ge=1)] | None, BeforeValidator(empty_to_none)]
+
+# Month from a select field, 1 = January; empty becomes None
+OptionalMonth = Annotated[Annotated[int, Field(ge=1, le=12)] | None, BeforeValidator(empty_to_none)]
+
+def _valid_month_day(value: str | None) -> str | None:
+    if value is not None:
+        date.fromisoformat(f"2000-{value}")  # leap year, so 02-29 is allowed
+    return value
+
+
+# Day of the year without a year (MM-DD), e.g. a deadline that repeats every year; empty becomes None
+MonthDay = Annotated[str, Field(pattern=r"^\d{2}-\d{2}$")]
+OptionalMonthDay = Annotated[MonthDay | None, AfterValidator(_valid_month_day), BeforeValidator(empty_to_none)]
 
 # ISO date (YYYY-MM-DD) and time of day (HH:MM) as strings, the way they are stored
 IsoDate = Annotated[str, Field(pattern=r"^\d{4}-\d{2}-\d{2}$")]
-OptionalIsoDate = Annotated[IsoDate | None, BeforeValidator(_empty_to_none)]
+OptionalIsoDate = Annotated[IsoDate | None, BeforeValidator(empty_to_none)]
 Time = Annotated[str, Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$")]
